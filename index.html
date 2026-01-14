@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Результаты голосования</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'display': ['Outfit', 'sans-serif'],
+                        'body': ['DM Sans', 'sans-serif'],
+                        'mono': ['JetBrains Mono', 'monospace']
+                    },
+                    colors: {
+                        'void': '#0a0a0f',
+                        'surface': '#12121a',
+                        'surface-light': '#1a1a26',
+                        'surface-hover': '#222232',
+                        'border': '#2a2a3a',
+                        'border-light': '#3a3a4a',
+                        'accent': {
+                            pink: '#ff3d7f',
+                            cyan: '#00d4ff',
+                            violet: '#8b5cf6',
+                            gold: '#fbbf24'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="bg-void text-gray-200 min-h-screen bg-grid flex flex-col">
+    <!-- Header -->
+    <header class="border-b border-border/50 backdrop-blur-sm bg-void/80 sticky top-0 z-50 no-print">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3">
+            <div class="flex items-center justify-between">
+                <a href="?" onclick="event.preventDefault(); navigateTo(null)" class="flex items-center gap-2 sm:gap-3 min-w-0 hover:opacity-80 transition-opacity cursor-pointer">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-accent-pink via-accent-violet to-accent-cyan flex items-center justify-center flex-shrink-0">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h1 class="font-display font-semibold text-sm sm:text-lg text-white truncate" id="page-title">Результаты</h1>
+                        <p class="text-xs text-gray-500 truncate hidden sm:block" id="page-subtitle"></p>
+                    </div>
+                </a>
+                
+                <nav id="dataset-nav" class="hidden"></nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full">
+        <!-- Loading State -->
+        <div id="loading-state" class="space-y-4">
+            <div class="skeleton h-6 w-48 rounded"></div>
+            <div class="bg-surface rounded-xl p-4 space-y-3">
+                <div class="skeleton h-10 w-full rounded"></div>
+                <div class="skeleton h-10 w-full rounded"></div>
+                <div class="skeleton h-10 w-full rounded"></div>
+            </div>
+        </div>
+        
+        <!-- Error State -->
+        <div id="error-state" class="hidden">
+            <div class="bg-surface rounded-xl p-8 text-center border border-red-500/20">
+                <div class="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h2 class="font-display text-lg font-semibold text-white mb-2">Данные не найдены</h2>
+                <p class="text-gray-400 text-sm mb-4" id="error-message">Указанный набор данных не существует.</p>
+                <a href="?" class="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-violet/20 text-accent-violet text-sm rounded-lg hover:bg-accent-violet/30 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Вернуться
+                </a>
+            </div>
+        </div>
+        
+        <!-- Content Container -->
+        <div id="content-container" class="hidden">
+            <!-- Populated by JS -->
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-border/50 mt-auto no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-start text-xs text-gray-600 h-6" id="footer-content">
+                <button id="paw-btn" class="opacity-30 hover:opacity-50 transition-opacity p-1">
+                    <img src="./paw.svg" alt="" class="w-4 h-4" style="filter: invert(0.4);">
+                </button>
+                <span id="narin-message" class="hidden text-gray-600 text-xs">Stan MEOVV Narin. A true next-level talent</span>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./script.js"></script>
+</body>
+</html>
