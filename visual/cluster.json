@@ -1,0 +1,679 @@
+[
+  {
+    "id": "agencies-clusters",
+    "name": "Визуализация по агенствам",
+    "datasets": [
+      {
+        "id": "votes-database",
+        "name": "Список",
+        "description": "",
+        "data": [
+          {
+            "voter_name": "Vitya Alvarez",
+            "total_user_votes": 31,
+            "assigned_cluster": "Cube Entertainment",
+            "cluster_strength": 41.9,
+            "full_portfolio": "Cube Entertainment: 13, JYP Entertainment: 3, Others: 2, P Nation: 3, SM Entertainment: 2, Starship Entertainment: 4, XGALX: 1, YG Entertainment: 3"
+          },
+          {
+            "voter_name": "Minjufag",
+            "total_user_votes": 47,
+            "assigned_cluster": "HYBE",
+            "cluster_strength": 34.0,
+            "full_portfolio": "DSP Media, Beats Entertainment: 2, F&F Entertainment: 1, HYBE: 16, Hi-Hat Entertainment: 3, High Up Entertainment: 2, JYP Entertainment: 6, Others: 6, SM Entertainment: 1, Starship Entertainment: 5, XGALX: 3, YG Entertainment: 1, iNKODE: 1"
+          },
+          {
+            "voter_name": "RUSLAN",
+            "total_user_votes": 48,
+            "assigned_cluster": "JYP Entertainment",
+            "cluster_strength": 29.2,
+            "full_portfolio": "HYBE: 6, High Up Entertainment: 1, JYP Entertainment: 14, Modhaus: 3, Others: 6, SM Entertainment: 10, Starship Entertainment: 2, The Black Label: 3, The Muse Entertainment: 1, Wake One Entertainment, Swing Entertainment: 2"
+          },
+          {
+            "voter_name": "Charli CXC",
+            "total_user_votes": 47,
+            "assigned_cluster": "JYP Entertainment",
+            "cluster_strength": 21.3,
+            "full_portfolio": "Big Planet Made Entertainment: 1, Cube Entertainment: 2, DSP Media, Beats Entertainment: 5, GLG: 1, H Music Entertainment: 2, HYBE: 1, Hi-Hat Entertainment: 3, High Up Entertainment: 1, JYP Entertainment: 10, Others: 1, SM Entertainment: 9, Starship Entertainment: 3, The Black Label: 8"
+          },
+          {
+            "voter_name": "bezumnoemesivo",
+            "total_user_votes": 47,
+            "assigned_cluster": "JYP Entertainment",
+            "cluster_strength": 25.5,
+            "full_portfolio": "F&F Entertainment: 3, HYBE: 6, Hi-Hat Entertainment: 1, JYP Entertainment: 12, Modhaus: 2, Others: 6, P Nation: 2, SM Entertainment: 3, Starship Entertainment: 5, The Black Label: 5, The Muse Entertainment: 1, YG Entertainment: 1"
+          },
+          {
+            "voter_name": "Tigran",
+            "total_user_votes": 47,
+            "assigned_cluster": "JYP Entertainment",
+            "cluster_strength": 17.0,
+            "full_portfolio": "Big Planet Made Entertainment: 1, Cube Entertainment: 1, Ego Ent.: 1, HYBE: 2, High Up Entertainment: 2, JYP Entertainment: 8, MZMC: 5, Others: 3, SM Entertainment: 3, Wake One Entertainment, Swing Entertainment: 6, YG Entertainment: 7, Yuehua Entertainment: 8"
+          },
+          {
+            "voter_name": "@ianist109",
+            "total_user_votes": 46,
+            "assigned_cluster": "JYP Entertainment",
+            "cluster_strength": 23.9,
+            "full_portfolio": "143 Entertainment: 1, DSP Media, Beats Entertainment: 1, HYBE: 10, JYP Entertainment: 11, MZMC: 1, Others: 5, SM Entertainment: 6, Starship Entertainment: 3, The Black Label: 2, Wake One: 1, Wake One Entertainment, Swing Entertainment: 1, YG Entertainment: 4"
+          },
+          {
+            "voter_name": "Archy",
+            "total_user_votes": 32,
+            "assigned_cluster": "Others",
+            "cluster_strength": 37.5,
+            "full_portfolio": "Dreamcatcher Company: 1, JYP Entertainment: 3, Others: 12, P Nation: 1, SM Entertainment: 6, The Black Label: 8, YG Entertainment: 1"
+          },
+          {
+            "voter_name": "Инжир S2U",
+            "total_user_votes": 47,
+            "assigned_cluster": "SM Entertainment",
+            "cluster_strength": 36.2,
+            "full_portfolio": "Big Planet Made Entertainment: 1, Cube Entertainment: 1, GLG: 1, High Up Entertainment: 3, JYP Entertainment: 2, Modhaus: 7, Others: 2, P Nation: 1, SM Entertainment: 17, Starship Entertainment: 8, The Black Label: 4"
+          },
+          {
+            "voter_name": "Neuroprophet",
+            "total_user_votes": 47,
+            "assigned_cluster": "SM Entertainment",
+            "cluster_strength": 19.1,
+            "full_portfolio": "Cube Entertainment: 1, F&F Entertainment: 1, HYBE: 8, Hi-Hat Entertainment: 6, High Up Entertainment: 1, JYP Entertainment: 6, P Nation: 1, SM Entertainment: 9, Starship Entertainment: 5, The Black Label: 2, Wake One Entertainment, Swing Entertainment: 1, YG Entertainment: 6"
+          },
+          {
+            "voter_name": "NARINFAG",
+            "total_user_votes": 47,
+            "assigned_cluster": "Starship Entertainment",
+            "cluster_strength": 14.9,
+            "full_portfolio": "Attrakt: 1, Cube Entertainment: 1, DSP Media, Beats Entertainment: 1, Ego Ent.: 2, F&F Entertainment: 1, HYBE: 3, Hi-Hat Entertainment: 2, High Up Entertainment: 1, JYP Entertainment: 6, MZMC: 2, Modhaus: 1, Others: 1, P Nation: 1, SM Entertainment: 5, Starship Entertainment: 7, TOP Media: 1, The Black Label: 5, The Muse Entertainment: 1, Wake One: 2, XGALX: 1, YG Entertainment: 2"
+          },
+          {
+            "voter_name": "Wintafag",
+            "total_user_votes": 47,
+            "assigned_cluster": "Starship Entertainment",
+            "cluster_strength": 36.2,
+            "full_portfolio": "Attrakt: 1, HYBE: 4, Hi-Hat Entertainment: 4, JYP Entertainment: 1, Others: 2, SM Entertainment: 7, Starship Entertainment: 17, The Black Label: 8, Titan Content: 2, Wake One: 1"
+          },
+          {
+            "voter_name": "Mr. Vampire 🍒",
+            "total_user_votes": 47,
+            "assigned_cluster": "Starship Entertainment",
+            "cluster_strength": 36.2,
+            "full_portfolio": "Attrakt: 1, DSP Media, Beats Entertainment: 3, HYBE: 2, Hi-Hat Entertainment: 5, JYP Entertainment: 7, Others: 1, SM Entertainment: 5, Starship Entertainment: 17, The Black Label: 2, Titan Content: 2, Wake One: 2"
+          },
+          {
+            "voter_name": "BOND",
+            "total_user_votes": 43,
+            "assigned_cluster": "The Black Label",
+            "cluster_strength": 20.9,
+            "full_portfolio": "F&F Entertainment: 1, HYBE: 8, Hi-Hat Entertainment: 4, High Up Entertainment: 2, JYP Entertainment: 1, Others: 5, SM Entertainment: 2, Starship Entertainment: 7, The Black Label: 9, Wake One Entertainment, Swing Entertainment: 3, YG Entertainment: 1"
+          }
+        ]
+      },
+      {
+        "id": "votes-database",
+        "name": "Хитмапа",
+        "description": "The Matrix View",
+        "data": [
+          {
+            "voter_name": "RUSLAN",
+            "total_votes": 48,
+            "hybe_votes": 6,
+            "sm_votes": 10,
+            "jyp_votes": 14,
+            "yg_votes": 0,
+            "other_votes": 18
+          },
+          {
+            "voter_name": "Neuroprophet",
+            "total_votes": 47,
+            "hybe_votes": 8,
+            "sm_votes": 9,
+            "jyp_votes": 6,
+            "yg_votes": 6,
+            "other_votes": 18
+          },
+          {
+            "voter_name": "Minjufag",
+            "total_votes": 47,
+            "hybe_votes": 16,
+            "sm_votes": 1,
+            "jyp_votes": 6,
+            "yg_votes": 1,
+            "other_votes": 23
+          },
+          {
+            "voter_name": "NARINFAG",
+            "total_votes": 47,
+            "hybe_votes": 3,
+            "sm_votes": 5,
+            "jyp_votes": 6,
+            "yg_votes": 2,
+            "other_votes": 31
+          },
+          {
+            "voter_name": "Charli CXC",
+            "total_votes": 47,
+            "hybe_votes": 1,
+            "sm_votes": 9,
+            "jyp_votes": 10,
+            "yg_votes": 0,
+            "other_votes": 27
+          },
+          {
+            "voter_name": "Tigran",
+            "total_votes": 47,
+            "hybe_votes": 2,
+            "sm_votes": 3,
+            "jyp_votes": 8,
+            "yg_votes": 7,
+            "other_votes": 27
+          },
+          {
+            "voter_name": "Mr. Vampire 🍒",
+            "total_votes": 47,
+            "hybe_votes": 2,
+            "sm_votes": 5,
+            "jyp_votes": 7,
+            "yg_votes": 0,
+            "other_votes": 33
+          },
+          {
+            "voter_name": "Wintafag",
+            "total_votes": 47,
+            "hybe_votes": 4,
+            "sm_votes": 7,
+            "jyp_votes": 1,
+            "yg_votes": 0,
+            "other_votes": 35
+          },
+          {
+            "voter_name": "bezumnoemesivo",
+            "total_votes": 47,
+            "hybe_votes": 6,
+            "sm_votes": 3,
+            "jyp_votes": 12,
+            "yg_votes": 1,
+            "other_votes": 25
+          },
+          {
+            "voter_name": "Инжир S2U",
+            "total_votes": 47,
+            "hybe_votes": 0,
+            "sm_votes": 17,
+            "jyp_votes": 2,
+            "yg_votes": 0,
+            "other_votes": 28
+          },
+          {
+            "voter_name": "@ianist109",
+            "total_votes": 46,
+            "hybe_votes": 10,
+            "sm_votes": 6,
+            "jyp_votes": 11,
+            "yg_votes": 4,
+            "other_votes": 15
+          },
+          {
+            "voter_name": "BOND",
+            "total_votes": 43,
+            "hybe_votes": 8,
+            "sm_votes": 2,
+            "jyp_votes": 1,
+            "yg_votes": 1,
+            "other_votes": 31
+          },
+          {
+            "voter_name": "Archy",
+            "total_votes": 32,
+            "hybe_votes": 0,
+            "sm_votes": 6,
+            "jyp_votes": 3,
+            "yg_votes": 1,
+            "other_votes": 22
+          },
+          {
+            "voter_name": "Vitya Alvarez",
+            "total_votes": 31,
+            "hybe_votes": 0,
+            "sm_votes": 2,
+            "jyp_votes": 3,
+            "yg_votes": 3,
+            "other_votes": 23
+          }
+        ]
+      },
+      {
+        "id": "votes-database",
+        "name": "Граф",
+        "description": "The Network View",
+        "data": [
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "Starship Entertainment",
+            "weight": 17
+          },
+          {
+            "source": "Wintafag",
+            "target": "Starship Entertainment",
+            "weight": 17
+          },
+          { "source": "Инжир S2U", "target": "SM Entertainment", "weight": 17 },
+          { "source": "Minjufag", "target": "HYBE", "weight": 16 },
+          { "source": "RUSLAN", "target": "JYP Entertainment", "weight": 14 },
+          {
+            "source": "Vitya Alvarez",
+            "target": "Cube Entertainment",
+            "weight": 13
+          },
+          {
+            "source": "bezumnoemesivo",
+            "target": "JYP Entertainment",
+            "weight": 12
+          },
+          { "source": "Archy", "target": "Others", "weight": 12 },
+          {
+            "source": "@ianist109",
+            "target": "JYP Entertainment",
+            "weight": 11
+          },
+          { "source": "@ianist109", "target": "HYBE", "weight": 10 },
+          {
+            "source": "Charli CXC",
+            "target": "JYP Entertainment",
+            "weight": 10
+          },
+          { "source": "RUSLAN", "target": "SM Entertainment", "weight": 10 },
+          {
+            "source": "Neuroprophet",
+            "target": "SM Entertainment",
+            "weight": 9
+          },
+          { "source": "Charli CXC", "target": "SM Entertainment", "weight": 9 },
+          { "source": "BOND", "target": "The Black Label", "weight": 9 },
+          { "source": "Archy", "target": "The Black Label", "weight": 8 },
+          { "source": "BOND", "target": "HYBE", "weight": 8 },
+          { "source": "Charli CXC", "target": "The Black Label", "weight": 8 },
+          { "source": "Neuroprophet", "target": "HYBE", "weight": 8 },
+          { "source": "Tigran", "target": "JYP Entertainment", "weight": 8 },
+          { "source": "Wintafag", "target": "The Black Label", "weight": 8 },
+          { "source": "Tigran", "target": "Yuehua Entertainment", "weight": 8 },
+          {
+            "source": "Инжир S2U",
+            "target": "Starship Entertainment",
+            "weight": 8
+          },
+          { "source": "Инжир S2U", "target": "Modhaus", "weight": 7 },
+          { "source": "Tigran", "target": "YG Entertainment", "weight": 7 },
+          { "source": "BOND", "target": "Starship Entertainment", "weight": 7 },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "JYP Entertainment",
+            "weight": 7
+          },
+          { "source": "Wintafag", "target": "SM Entertainment", "weight": 7 },
+          {
+            "source": "NARINFAG",
+            "target": "Starship Entertainment",
+            "weight": 7
+          },
+          {
+            "source": "Neuroprophet",
+            "target": "YG Entertainment",
+            "weight": 6
+          },
+          { "source": "@ianist109", "target": "SM Entertainment", "weight": 6 },
+          { "source": "Minjufag", "target": "JYP Entertainment", "weight": 6 },
+          {
+            "source": "Neuroprophet",
+            "target": "Hi-Hat Entertainment",
+            "weight": 6
+          },
+          { "source": "RUSLAN", "target": "Others", "weight": 6 },
+          { "source": "bezumnoemesivo", "target": "Others", "weight": 6 },
+          { "source": "RUSLAN", "target": "HYBE", "weight": 6 },
+          { "source": "NARINFAG", "target": "JYP Entertainment", "weight": 6 },
+          { "source": "bezumnoemesivo", "target": "HYBE", "weight": 6 },
+          { "source": "Archy", "target": "SM Entertainment", "weight": 6 },
+          {
+            "source": "Neuroprophet",
+            "target": "JYP Entertainment",
+            "weight": 6
+          },
+          { "source": "Minjufag", "target": "Others", "weight": 6 },
+          {
+            "source": "Tigran",
+            "target": "Wake One Entertainment, Swing Entertainment",
+            "weight": 6
+          },
+          { "source": "Tigran", "target": "MZMC", "weight": 5 },
+          {
+            "source": "Neuroprophet",
+            "target": "Starship Entertainment",
+            "weight": 5
+          },
+          { "source": "NARINFAG", "target": "SM Entertainment", "weight": 5 },
+          {
+            "source": "Charli CXC",
+            "target": "DSP Media, Beats Entertainment",
+            "weight": 5
+          },
+          { "source": "@ianist109", "target": "Others", "weight": 5 },
+          { "source": "NARINFAG", "target": "The Black Label", "weight": 5 },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "Hi-Hat Entertainment",
+            "weight": 5
+          },
+          {
+            "source": "Minjufag",
+            "target": "Starship Entertainment",
+            "weight": 5
+          },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "SM Entertainment",
+            "weight": 5
+          },
+          {
+            "source": "bezumnoemesivo",
+            "target": "The Black Label",
+            "weight": 5
+          },
+          { "source": "BOND", "target": "Others", "weight": 5 },
+          {
+            "source": "bezumnoemesivo",
+            "target": "Starship Entertainment",
+            "weight": 5
+          },
+          { "source": "Инжир S2U", "target": "The Black Label", "weight": 4 },
+          { "source": "BOND", "target": "Hi-Hat Entertainment", "weight": 4 },
+          {
+            "source": "Vitya Alvarez",
+            "target": "Starship Entertainment",
+            "weight": 4
+          },
+          {
+            "source": "Wintafag",
+            "target": "Hi-Hat Entertainment",
+            "weight": 4
+          },
+          { "source": "Wintafag", "target": "HYBE", "weight": 4 },
+          { "source": "@ianist109", "target": "YG Entertainment", "weight": 4 },
+          { "source": "Archy", "target": "JYP Entertainment", "weight": 3 },
+          { "source": "RUSLAN", "target": "The Black Label", "weight": 3 },
+          {
+            "source": "Charli CXC",
+            "target": "Hi-Hat Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "bezumnoemesivo",
+            "target": "SM Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "Charli CXC",
+            "target": "Starship Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "bezumnoemesivo",
+            "target": "F&F Entertainment",
+            "weight": 3
+          },
+          { "source": "Vitya Alvarez", "target": "P Nation", "weight": 3 },
+          {
+            "source": "@ianist109",
+            "target": "Starship Entertainment",
+            "weight": 3
+          },
+          { "source": "RUSLAN", "target": "Modhaus", "weight": 3 },
+          { "source": "Tigran", "target": "Others", "weight": 3 },
+          {
+            "source": "Инжир S2U",
+            "target": "High Up Entertainment",
+            "weight": 3
+          },
+          { "source": "Tigran", "target": "SM Entertainment", "weight": 3 },
+          {
+            "source": "Vitya Alvarez",
+            "target": "JYP Entertainment",
+            "weight": 3
+          },
+          { "source": "Minjufag", "target": "XGALX", "weight": 3 },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "DSP Media, Beats Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "BOND",
+            "target": "Wake One Entertainment, Swing Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "Minjufag",
+            "target": "Hi-Hat Entertainment",
+            "weight": 3
+          },
+          {
+            "source": "Vitya Alvarez",
+            "target": "YG Entertainment",
+            "weight": 3
+          },
+          { "source": "NARINFAG", "target": "HYBE", "weight": 3 },
+          {
+            "source": "Charli CXC",
+            "target": "H Music Entertainment",
+            "weight": 2
+          },
+          { "source": "Vitya Alvarez", "target": "Others", "weight": 2 },
+          {
+            "source": "Tigran",
+            "target": "High Up Entertainment",
+            "weight": 2
+          },
+          { "source": "Инжир S2U", "target": "Others", "weight": 2 },
+          { "source": "NARINFAG", "target": "Ego Ent.", "weight": 2 },
+          {
+            "source": "NARINFAG",
+            "target": "Hi-Hat Entertainment",
+            "weight": 2
+          },
+          { "source": "Wintafag", "target": "Others", "weight": 2 },
+          { "source": "BOND", "target": "High Up Entertainment", "weight": 2 },
+          { "source": "bezumnoemesivo", "target": "Modhaus", "weight": 2 },
+          { "source": "@ianist109", "target": "The Black Label", "weight": 2 },
+          { "source": "Инжир S2U", "target": "JYP Entertainment", "weight": 2 },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "The Black Label",
+            "weight": 2
+          },
+          {
+            "source": "RUSLAN",
+            "target": "Starship Entertainment",
+            "weight": 2
+          },
+          {
+            "source": "Minjufag",
+            "target": "High Up Entertainment",
+            "weight": 2
+          },
+          { "source": "Tigran", "target": "HYBE", "weight": 2 },
+          {
+            "source": "Mr. Vampire 🍒",
+            "target": "Titan Content",
+            "weight": 2
+          },
+          { "source": "NARINFAG", "target": "YG Entertainment", "weight": 2 },
+          {
+            "source": "Minjufag",
+            "target": "DSP Media, Beats Entertainment",
+            "weight": 2
+          },
+          {
+            "source": "RUSLAN",
+            "target": "Wake One Entertainment, Swing Entertainment",
+            "weight": 2
+          },
+          { "source": "Mr. Vampire 🍒", "target": "Wake One", "weight": 2 },
+          { "source": "NARINFAG", "target": "MZMC", "weight": 2 },
+          { "source": "Wintafag", "target": "Titan Content", "weight": 2 },
+          { "source": "NARINFAG", "target": "Wake One", "weight": 2 },
+          { "source": "Mr. Vampire 🍒", "target": "HYBE", "weight": 2 },
+          {
+            "source": "Charli CXC",
+            "target": "Cube Entertainment",
+            "weight": 2
+          },
+          { "source": "bezumnoemesivo", "target": "P Nation", "weight": 2 },
+          { "source": "BOND", "target": "SM Entertainment", "weight": 2 },
+          {
+            "source": "Neuroprophet",
+            "target": "The Black Label",
+            "weight": 2
+          },
+          {
+            "source": "Vitya Alvarez",
+            "target": "SM Entertainment",
+            "weight": 2
+          },
+          { "source": "NARINFAG", "target": "P Nation", "weight": 1 },
+          {
+            "source": "Charli CXC",
+            "target": "Big Planet Made Entertainment",
+            "weight": 1
+          },
+          { "source": "NARINFAG", "target": "Modhaus", "weight": 1 },
+          {
+            "source": "NARINFAG",
+            "target": "DSP Media, Beats Entertainment",
+            "weight": 1
+          },
+          { "source": "BOND", "target": "YG Entertainment", "weight": 1 },
+          {
+            "source": "Tigran",
+            "target": "Big Planet Made Entertainment",
+            "weight": 1
+          },
+          { "source": "Minjufag", "target": "iNKODE", "weight": 1 },
+          { "source": "Tigran", "target": "Cube Entertainment", "weight": 1 },
+          { "source": "Vitya Alvarez", "target": "XGALX", "weight": 1 },
+          { "source": "NARINFAG", "target": "XGALX", "weight": 1 },
+          {
+            "source": "Neuroprophet",
+            "target": "F&F Entertainment",
+            "weight": 1
+          },
+          { "source": "Инжир S2U", "target": "P Nation", "weight": 1 },
+          {
+            "source": "NARINFAG",
+            "target": "High Up Entertainment",
+            "weight": 1
+          },
+          {
+            "source": "Инжир S2U",
+            "target": "Cube Entertainment",
+            "weight": 1
+          },
+          {
+            "source": "Neuroprophet",
+            "target": "Cube Entertainment",
+            "weight": 1
+          },
+          { "source": "Archy", "target": "Dreamcatcher Company", "weight": 1 },
+          { "source": "NARINFAG", "target": "TOP Media", "weight": 1 },
+          {
+            "source": "RUSLAN",
+            "target": "The Muse Entertainment",
+            "weight": 1
+          },
+          { "source": "NARINFAG", "target": "Cube Entertainment", "weight": 1 },
+          { "source": "NARINFAG", "target": "F&F Entertainment", "weight": 1 },
+          { "source": "Mr. Vampire 🍒", "target": "Attrakt", "weight": 1 },
+          {
+            "source": "Neuroprophet",
+            "target": "High Up Entertainment",
+            "weight": 1
+          },
+          {
+            "source": "Инжир S2U",
+            "target": "Big Planet Made Entertainment",
+            "weight": 1
+          },
+          {
+            "source": "RUSLAN",
+            "target": "High Up Entertainment",
+            "weight": 1
+          },
+          { "source": "Tigran", "target": "Ego Ent.", "weight": 1 },
+          {
+            "source": "@ianist109",
+            "target": "Wake One Entertainment, Swing Entertainment",
+            "weight": 1
+          },
+          { "source": "Charli CXC", "target": "HYBE", "weight": 1 },
+          {
+            "source": "Charli CXC",
+            "target": "High Up Entertainment",
+            "weight": 1
+          },
+          { "source": "NARINFAG", "target": "Attrakt", "weight": 1 },
+          { "source": "Wintafag", "target": "JYP Entertainment", "weight": 1 },
+          {
+            "source": "Neuroprophet",
+            "target": "Wake One Entertainment, Swing Entertainment",
+            "weight": 1
+          },
+          { "source": "Charli CXC", "target": "GLG", "weight": 1 },
+          {
+            "source": "bezumnoemesivo",
+            "target": "The Muse Entertainment",
+            "weight": 1
+          },
+          { "source": "Wintafag", "target": "Wake One", "weight": 1 },
+          {
+            "source": "bezumnoemesivo",
+            "target": "YG Entertainment",
+            "weight": 1
+          },
+          { "source": "NARINFAG", "target": "Others", "weight": 1 },
+          { "source": "Minjufag", "target": "YG Entertainment", "weight": 1 },
+          { "source": "Archy", "target": "YG Entertainment", "weight": 1 },
+          { "source": "BOND", "target": "JYP Entertainment", "weight": 1 },
+          {
+            "source": "@ianist109",
+            "target": "143 Entertainment",
+            "weight": 1
+          },
+          { "source": "Инжир S2U", "target": "GLG", "weight": 1 },
+          { "source": "@ianist109", "target": "Wake One", "weight": 1 },
+          {
+            "source": "NARINFAG",
+            "target": "The Muse Entertainment",
+            "weight": 1
+          },
+          { "source": "Archy", "target": "P Nation", "weight": 1 },
+          { "source": "Wintafag", "target": "Attrakt", "weight": 1 },
+          { "source": "Minjufag", "target": "SM Entertainment", "weight": 1 },
+          { "source": "BOND", "target": "F&F Entertainment", "weight": 1 },
+          {
+            "source": "@ianist109",
+            "target": "DSP Media, Beats Entertainment",
+            "weight": 1
+          },
+          { "source": "@ianist109", "target": "MZMC", "weight": 1 },
+          {
+            "source": "bezumnoemesivo",
+            "target": "Hi-Hat Entertainment",
+            "weight": 1
+          },
+          { "source": "Neuroprophet", "target": "P Nation", "weight": 1 },
+          { "source": "Mr. Vampire 🍒", "target": "Others", "weight": 1 },
+          { "source": "Minjufag", "target": "F&F Entertainment", "weight": 1 },
+          { "source": "Charli CXC", "target": "Others", "weight": 1 }
+        ]
+      }
+    ]
+  }
+]

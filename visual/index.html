@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Визуализация: Кластеры пользователей</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              display: ["Outfit", "sans-serif"],
+              body: ["DM Sans", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+            colors: {
+              void: "#0a0a0f",
+              surface: "#12121a",
+              "surface-light": "#1a1a26",
+              border: "#2a2a3a",
+              "accent-violet": "#8b5cf6",
+              "accent-cyan": "#00d4ff",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      body {
+        background-color: #0a0a0f;
+        color: #e0e0e0;
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        z-index: 50;
+      }
+      .bar {
+        transition: opacity 0.3s;
+      }
+      .bar:hover {
+        opacity: 0.8;
+      }
+      .axis-text {
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+      }
+      .tab-btn {
+        border: 1px solid transparent;
+      }
+      .tab-btn:hover {
+        border-color: #8b5cf6;
+      }
+      .tab-btn.bg-accent-violet {
+        border-color: #8b5cf6;
+        box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+      }
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #1a1a26;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3a3a4a;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #4a4a5a;
+      }
+    </style>
+  </head>
+  <body class="bg-void text-gray-200 min-h-screen p-4 sm:p-8 font-body">
+    <div class="max-w-7xl mx-auto">
+      <header class="mb-6">
+        <h1
+          class="font-display text-3xl font-bold text-white mb-2"
+          id="chart-title"
+        >
+          Загрузка...
+        </h1>
+        <p class="text-gray-400 mb-4" id="chart-subtitle">
+          Статистика упоминаний компаний
+        </p>
+        <div id="tab-container" class="flex flex-wrap gap-2"></div>
+      </header>
+
+      <div
+        class="bg-surface rounded-2xl border border-border p-4 sm:p-6 shadow-xl relative overflow-hidden"
+      >
+        <div id="chart-container" class="w-full min-h-[600px]"></div>
+
+        <!-- Tooltip Template -->
+        <div
+          id="tooltip"
+          class="tooltip bg-surface-light border border-border p-3 rounded-lg shadow-2xl max-w-sm"
+        >
+          <div
+            class="font-display font-bold text-white mb-1"
+            id="tt-title"
+          ></div>
+          <div
+            class="text-accent-cyan font-mono text-lg mb-2"
+            id="tt-value"
+          ></div>
+          <div
+            class="text-xs text-gray-400 border-t border-border pt-2 mt-1"
+            id="tt-desc"
+          ></div>
+        </div>
+      </div>
+
+      <div class="mt-4 text-center">
+        <a
+          href="../index.html"
+          class="text-sm text-gray-500 hover:text-white transition-colors"
+          >← Вернуться к таблицам</a
+        >
+      </div>
+    </div>
+
+    <script src="visualization.js"></script>
+  </body>
+</html>
