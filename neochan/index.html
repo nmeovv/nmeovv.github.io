@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1200">
+    <title>Статистика по постингу</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <nav class="tabs">
+            <a href="#tab=posts" class="tab active" data-tab="posts">Кол-во постов</a>
+            <a href="#tab=speed" class="tab" data-tab="speed">Скорость</a>
+        </nav>
+
+        <div class="tab-content active" id="tab-posts">
+            <h1>Топ пользователей по количеству постов</h1>
+            <div class="controls">
+                <button id="posts-playPauseBtn">Пауза</button>
+                <label>
+                    Скорость анимации:
+                    <input type="range" id="posts-speedSlider" min="1" max="20" value="10">
+                    <span id="posts-speedValue">10 дней/сек</span>
+                </label>
+                <label>
+                    Топ N постеров (0 = все):
+                    <input type="number" id="posts-topN" min="0" value="0">
+                </label>
+                <label class="date-range-label">
+                    Период:
+                    <input type="date" id="posts-dateStart" title="Начало периода">
+                    <span class="date-range-sep">—</span>
+                    <input type="date" id="posts-dateEnd" title="Конец периода">
+                    <button id="posts-dateReset" class="date-reset-btn" title="Сбросить период">✕</button>
+                </label>
+            </div>
+            <div class="chart-wrapper">
+                <div id="posts-chart"></div>
+                <div id="posts-speedOverlay"></div>
+                <div class="date-overlay" id="posts-dateOverlay"></div>
+            </div>
+            <div id="posts-scrubber"></div>
+        </div>
+
+        <div class="tab-content" id="tab-speed">
+            <h1>Скорость постинга (посты в день)</h1>
+            <div class="controls">
+                <button id="speed-playPauseBtn">Пауза</button>
+                <label>
+                    Скорость анимации:
+                    <input type="range" id="speed-speedSlider" min="1" max="20" value="3">
+                    <span id="speed-speedValue">3 дней/сек</span>
+                </label>
+                <label>
+                    Топ N постеров (0 = все):
+                    <input type="number" id="speed-topN" min="0" value="0">
+                </label>
+                <label class="date-range-label">
+                    Период:
+                    <input type="date" id="speed-dateStart" title="Начало периода">
+                    <span class="date-range-sep">—</span>
+                    <input type="date" id="speed-dateEnd" title="Конец периода">
+                    <button id="speed-dateReset" class="date-reset-btn" title="Сбросить период">✕</button>
+                </label>
+            </div>
+            <div class="chart-wrapper">
+                <div id="speed-bars"></div>
+                <div class="date-overlay" id="speed-dateOverlay"></div>
+            </div>
+            <div id="speed-scrubber"></div>
+            <div class="resize-divider" id="speed-resize-divider"></div>
+            <div class="line-chart-row">
+                <div id="speed-lineChart"></div>
+                <div id="speed-legend"></div>
+            </div>
+        </div>
+    </div>
+    <script src="chart.js"></script>
+</body>
+</html>

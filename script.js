@@ -13,6 +13,18 @@ const CONFIG = {
     scrollOffset: 100
 };
 
+const VISUALIZATION_PAGES = [
+    {
+        name: 'Статистика по постингу',
+        href: './neochan/',
+        description: 'Анимированные чарты',
+        tabs: [
+            { name: 'Кол-во постов', hash: '#tab=posts' },
+            { name: 'Скорость', hash: '#tab=speed' }
+        ]
+    }
+];
+
 // ============================================================================
 // Icons (Heroicons SVG)
 // ============================================================================
@@ -821,6 +833,7 @@ function renderHierarchicalNav(allData, currentPageId, currentDatasets) {
                     </li>
                 `;
             }).join('')}
+            ${renderVisualizationNav()}
         </ul>
     `;
 }
@@ -922,6 +935,7 @@ function renderIndexPage(allData) {
                         </a>
                     `).join('')}
                 </div>
+                ${renderVisualizationCards()}
             </div>
         </div>
     `;
@@ -969,7 +983,73 @@ function renderIndexNav(allData) {
                     </li>
                 `;
             }).join('')}
+            ${renderVisualizationNav()}
         </ul>
+    `;
+}
+
+/**
+ * Render visualization page links for sidebar navigation
+ */
+function renderVisualizationNav() {
+    if (VISUALIZATION_PAGES.length === 0) return '';
+    return `
+        <li class="nav-separator">
+            <span class="nav-separator-text">Визуализации</span>
+        </li>
+        ${VISUALIZATION_PAGES.map(page => `
+            <li class="nav-group expanded">
+                <a href="${page.href}" class="nav-group-toggle" style="text-decoration: none;">
+                    <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                    </svg>
+                    <span class="nav-group-text">${escapeHtml(page.name)}</span>
+                </a>
+                ${page.tabs && page.tabs.length > 0 ? `
+                    <ul class="nav-children">
+                        ${page.tabs.map(tab => `
+                            <li class="nav-child">
+                                <a href="${page.href}${tab.hash}" class="nav-link">
+                                    <span class="nav-text">${escapeHtml(tab.name)}</span>
+                                </a>
+                            </li>
+                        `).join('')}
+                    </ul>
+                ` : ''}
+            </li>
+        `).join('')}
+    `;
+}
+
+/**
+ * Render visualization cards for the index page
+ */
+function renderVisualizationCards() {
+    if (VISUALIZATION_PAGES.length === 0) return '';
+    return `
+        <div class="mt-8">
+            <h3 class="font-display text-lg font-semibold text-white mb-3">Визуализации</h3>
+            <div class="index-grid">
+                ${VISUALIZATION_PAGES.map((page, idx) => `
+                    <a href="${page.href}" 
+                       class="index-card animate-in"
+                       style="animation-delay: ${(idx + 20) * CONFIG.animationDelay}ms">
+                        <div class="index-card-icon" style="background: rgba(0, 212, 255, 0.1); color: #00d4ff;">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                        </div>
+                        <div class="index-card-content">
+                            <h3 class="index-card-title">${escapeHtml(page.name)}</h3>
+                            <p class="index-card-count">${escapeHtml(page.description)}</p>
+                        </div>
+                        <svg class="index-card-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                `).join('')}
+            </div>
+        </div>
     `;
 }
 

@@ -287,6 +287,20 @@ body {
     transform: rotate(180deg);
 }
 
+/* Nav section separator */
+.nav-separator {
+    padding: 16px 12px 6px;
+    list-style: none;
+}
+
+.nav-separator-text {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #4b5563;
+}
+
 /* Child navigation - hidden by default */
 .nav-children {
     display: none;
