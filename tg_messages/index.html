@@ -220,15 +220,16 @@ table.data tr:last-child td { border-bottom:0; }
 
 <!-- ============ MATRIX ============ -->
 <section>
-  <h2>Who replies to whom?</h2>
+  <h2>Who interacts with whom?</h2>
   <p class="note">
-    Pick a name on the left, then read across. Darker boxes mean more replies or reactions.
+    Pick a name on the left, then read across. Darker boxes mean more replies, reactions, or mentions.
     Use "Compared with normal" to account for how often each person posts.
   </p>
   <div class="controls">
     <div class="seg" id="layer">
       <button data-v="reply" aria-pressed="true">Replies</button>
       <button data-v="react" aria-pressed="false">Reactions</button>
+      <button data-v="mention" aria-pressed="false">Mentions</button>
     </div>
     <div class="seg" id="scale">
       <button data-v="raw" aria-pressed="true">Total</button>
@@ -310,11 +311,11 @@ table.data tr:last-child td { border-bottom:0; }
 
 <!-- ============ CLIQUE CLAIM ============ -->
 <section id="claim">
-  <h2>Do these four mostly talk among themselves?</h2>
+  <h2>Do these four mostly interact among themselves?</h2>
   <p class="note">
-    The four people are <b id="claimNames"></b>. Three of them post a lot, so large reply
+    The four people are <b id="claimNames"></b>. Three of them post a lot, so large interaction
     counts alone prove very little. The comparison below adjusts for that. A score of 1.00x
-    is normal for the amount they post.
+    is normal for the amount they post. Switch between replies, reactions, and tags below.
   </p>
   <div id="verdict"></div>
   <details class="more" open>
@@ -323,6 +324,7 @@ table.data tr:last-child td { border-bottom:0; }
       <div class="seg" id="cLayer">
         <button data-v="reply" aria-pressed="true">Replies</button>
         <button data-v="react" aria-pressed="false">Reactions</button>
+        <button data-v="mention" aria-pressed="false">Mentions</button>
       </div>
     </div>
     <div id="claimBody"></div>
@@ -393,6 +395,9 @@ const topPair = D.pairs[0];
 const tiles = [
   [fmt(D.totals.messages), 'Messages', `${fmt(D.totals.replies)} are replies, or ${pct(D.totals.replies / D.totals.messages)}`],
   [fmt(D.totals.reactionsTotal), 'Reactions', `${(D.totals.reactionsTotal / D.totals.messages).toFixed(2)} per message`],
+  [fmt(D.totals.mentionsMapped), 'Mentions', D.totals.mentionsTotal
+    ? `${pct(D.totals.mentionsMapped / D.totals.mentionsTotal)} matched to a regular`
+    : 'No tags found'],
   [fmt(D.totals.threads), 'Conversations', `The longest has ${bigThread.size} messages and ${deepest.depth} reply levels`],
   [P[topPair.a] + ' ↔ ' + P[topPair.b], 'Closest pair', `${topPair.total} replies exchanged, ${topPair.lift.toFixed(2)}x normal`, 1],
   [mostReactive.name, 'Replies most often', `${pct(mostReactive.replyRate)} of their messages answer someone`, 1],
@@ -425,7 +430,7 @@ const DIV = DIV_T.map(v => `var(${v})`);
 const ink = t => `var(${t}-ink)`;
 
 const qs = pageParams;
-let layer = ['reply', 'react'].includes(qs.get('layer')) ? qs.get('layer') : 'reply';
+let layer = ['reply', 'react', 'mention'].includes(qs.get('layer')) ? qs.get('layer') : 'reply';
 let scale = ['raw', 'row', 'aff'].includes(qs.get('scale')) ? qs.get('scale') : 'raw';
 [['#layer', layer], ['#scale', scale]].forEach(([sel, v]) =>
   [...$(sel).children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)));
@@ -447,10 +452,10 @@ const paint = (tokens, i) =>
         : { bg: `var(${tokens[i]})`, fg: ink(tokens[i]) };
 
 function drawMatrix() {
-  const M = layer === 'reply' ? D.reply : D.react;
-  const E = layer === 'reply' ? D.expected : D.reactExpected;
-  const A = layer === 'reply' ? D.affinity : D.reactAffinity;
-  const verb = layer === 'reply' ? 'replies' : 'reactions';
+  const M = layer === 'reply' ? D.reply : layer === 'react' ? D.react : D.mention;
+  const E = layer === 'reply' ? D.expected : layer === 'react' ? D.reactExpected : D.mentionExpected;
+  const A = layer === 'reply' ? D.affinity : layer === 'react' ? D.reactAffinity : D.mentionAffinity;
+  const verb = layer === 'reply' ? 'replies' : layer === 'react' ? 'reactions' : 'mentions';
   const rowTot = M.map(r => r.reduce((a, b) => a + b, 0));
 
   let max = 0;
@@ -458,7 +463,8 @@ function drawMatrix() {
 
   const t = el('table', 'matrix');
   const head = el('tr');
-  head.append(el('th', 'corner', layer === 'reply' ? 'from ↓ / to →' : 'given by ↓ / given to →'));
+  head.append(el('th', 'corner',
+    layer === 'reply' ? 'from ↓ / to →' : layer === 'react' ? 'given by ↓ / given to →' : 'tagged by ↓ / tagged person →'));
   P.forEach(p => { const th = el('th', 'col'); th.append(el('span', null, p)); head.append(th); });
   t.append(head);
 
@@ -595,6 +601,8 @@ drawMatrix();
     ['Reactions given', p => fmt(p.reactionsGiven)],
     ['Reactions received', p => fmt(p.reactionsGot)],
     ['Reactions per post', p => p.reactionsPerMsg.toFixed(2)],
+    ['Mentions given', p => fmt(p.mentionsGiven)],
+    ['Mentions received', p => fmt(p.mentionsGot)],
   ];
   function barCell(v, m) {
     return `${pct(v)}<span class="mini"><i style="background:var(--s1);width:${Math.min(100, v / m * 100)}%"></i></span>`;
@@ -768,7 +776,7 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
 
   function verdict() {
     const box = el('div', 'verdict');
-    const reply = C.layers.reply, react = C.layers.react;
+    const reply = C.layers.reply, react = C.layers.react, mention = C.layers.mention;
     const trio = reply.trios[0];                       // the trio that scores highest
     const weakest = reply.swaps.reduce((a, b) => a.beats > b.beats ? a : b);
     const inward = [...reply.members].sort((a, b) => b.shareInternal - a.shareInternal);
@@ -794,19 +802,25 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
        ${pct(1 - most.shareInternal)} of their replies to other people. ` +
       (react.cohesion >= 1.1
         ? `Reactions point the same way. The four get a ${react.cohesion.toFixed(2)}x score there, above normal.</p>`
-        : `Reactions do not show a group. The four get a ${react.cohesion.toFixed(2)}x score there, close to normal.</p>`);
+        : `Reactions do not show a group. The four get a ${react.cohesion.toFixed(2)}x score there, close to normal.</p>`) +
+
+      (mention.cohesion >= 1.1
+        ? `<p>Tags add another signal. The four mention each other at ${mention.cohesion.toFixed(2)}x the normal rate.</p>`
+        : `<p>Tags do not add much. The four mention each other at ${mention.cohesion.toFixed(2)}x the normal rate.</p>`);
     return box;
   }
 
   function render() {
     const L = C.layers[cl];
+    const interaction = cl === 'reply' ? 'replies' : cl === 'react' ? 'reactions' : 'mentions';
+    const interactionVerb = cl === 'reply' ? 'reply to' : cl === 'react' ? 'react to' : 'mention';
     const body = $('#claimBody');
     body.replaceChildren();
 
     // headline numbers
     const tiles = el('div', 'tiles');
     [[L.cohesion.toFixed(2) + 'x', 'Compared with normal', `${fmt(L.obs)} actual, ${fmt(L.exp)} normal`],
-     [`#${L.rank}`, `of ${fmt(L.totalCombos)} groups`, `ranked by how much they talk among themselves`],
+     [`#${L.rank}`, `of ${fmt(L.totalCombos)} groups`, `ranked by how much they ${interactionVerb} one another`],
      [L.null.z > 3 ? 'Very unlikely' : 'Nothing unusual', 'Random chance?', `Compared with ${fmt(L.null.trials)} shuffled chats`],
      [pct(C.groupMsgShare), 'Share of all messages', `sent by these four`],
     ].forEach(([v, k, h]) => {
@@ -821,7 +835,7 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     dist.style.marginTop = '18px';
     dist.append(el('h2', null, 'How this group compares'));
     dist.append(el('p', 'note',
-      `Each bar represents a group of four. Groups farther to the right talk among themselves ` +
+      `Each bar represents a group of four. Groups farther to the right ${interactionVerb} one another ` +
       `more often. The orange bar is the group in question.`));
     const vals = L.allCohesion, lo = vals[0], hi = vals[vals.length - 1];
     const BINS = 46, bins = new Array(BINS).fill(0);
@@ -861,7 +875,7 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     mem.style.marginTop = '18px';
     mem.append(el('h2', null, 'Who focuses on the group?'));
     mem.append(el('p', 'note',
-      `The left side shows how often each person ${cl === 'reply' ? 'replies' : 'reacts'} ` +
+      `The left side shows how often each person ${cl === 'reply' ? 'replies' : cl === 'react' ? 'reacts' : 'mentions someone'} ` +
       `inside the group. The right side shows the same for everyone else. A bar to the right ` +
       `means more activity than normal.`));
     mem.append(el('div', 'hdr2',
@@ -907,7 +921,7 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     // internal pairs
     const pr = el('div', 'card');
     pr.append(el('h2', null, 'Pairs inside the group'));
-    pr.append(el('p', 'note', 'The group score can hide pairs who rarely talk to each other.'));
+    pr.append(el('p', 'note', `The group score can hide pairs who rarely exchange ${interaction}.`));
     const ph = el('div', 'hdr2', '<span></span><span>compared with normal</span>');
     ph.style.gridTemplateColumns = '195px 1fr';
     pr.append(ph);
@@ -954,7 +968,7 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
       `person posts. The original group's score is ${L.cohesion.toFixed(2)}x.`));
     const et = el('table', 'data');
     et.append(el('tr', null,
-      `<th>Group</th><th>${cl === 'reply' ? 'Replies among them' : 'Reactions among them'}</th>` +
+      `<th>Group</th><th>${interaction[0].toUpperCase() + interaction.slice(1)} among them</th>` +
       '<th>Compared with normal</th>'));
     L.topZ.slice(0, 2).forEach(group => {
       const tr = el('tr');
@@ -981,7 +995,9 @@ $('#foot').innerHTML =
   `${fmt(D.totals.danglingReplies)} replies point to messages outside the export, so they are not counted. ` +
   `Telegram names only the most recent people who used each reaction. Because of that, the reaction grid ` +
   `covers ${fmt(D.totals.reactionsAttributed)} of ${fmt(D.totals.reactionsTotal)} reactions, or ` +
-  `${pct(D.totals.reactionsAttributed / D.totals.reactionsTotal)}. The totals in the People table still include every reaction received.`;
+  `${pct(D.totals.reactionsAttributed / D.totals.reactionsTotal)}. The totals in the People table still include every reaction received. ` +
+  `The mention grid maps ${fmt(D.totals.mentionsMapped)} of ${fmt(D.totals.mentionsTotal)} tags to regular chat members. ` +
+  `Unknown handles, news accounts, and bots are not assigned to a person.`;
 
 /* ---------- theme ---------- */
 if (qs.get('theme') === 'dark') {
