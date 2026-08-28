@@ -919,6 +919,29 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
       outs.append(r);
     });
     body.append(outs);
+
+    const examples = el('div', 'card');
+    examples.style.marginTop = '18px';
+    examples.append(el('h2', null, 'Two groups that are tighter'));
+    examples.append(el('p', 'note',
+      `These groups score higher than the original four after accounting for how much each ` +
+      `person posts. The original group's score is ${L.cohesion.toFixed(2)}x.`));
+    const et = el('table', 'data');
+    et.append(el('tr', null,
+      `<th>Group</th><th>${cl === 'reply' ? 'Replies among them' : 'Reactions among them'}</th>` +
+      '<th>Compared with normal</th>'));
+    L.top.slice(0, 2).forEach(group => {
+      const tr = el('tr');
+      const names = group.members.map(i => C.people[i]).join(', ');
+      tr.append(
+        el('td', 'name', names),
+        el('td', null, fmt(group.obs)),
+        el('td', null, group.coh.toFixed(2) + 'x')
+      );
+      et.append(tr);
+    });
+    examples.append(et);
+    body.append(examples);
   }
 
   $('#verdict').append(verdict(), clusterOverview());
