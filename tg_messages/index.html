@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who talks to whom</title>
+<style>
+:root {
+  color-scheme: light;
+  --page:#f9f9f7; --surface:#fcfcfb;
+  --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,0.10);
+  --s1:#2a78d6; --s2:#eb6834;
+  --seq0:#eef4fd; --seq1:#cde2fb; --seq2:#9ec5f4; --seq3:#5598e7;
+  --seq4:#2a78d6; --seq5:#1c5cab; --seq6:#104281;
+  --seq0-ink:#0b0b0b; --seq1-ink:#0b0b0b; --seq2-ink:#0b0b0b; --seq3-ink:#0b0b0b;
+  --seq4-ink:#fcfcfb; --seq5-ink:#fcfcfb; --seq6-ink:#fcfcfb;
+  --divlo:#104281; --divlo2:#5598e7; --divmid:#f0efec; --divhi2:#e9a09f; --divhi:#d03b3b;
+  --divlo-ink:#fcfcfb; --divlo2-ink:#0b0b0b; --divmid-ink:#0b0b0b;
+  --divhi2-ink:#0b0b0b; --divhi-ink:#fcfcfb;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page:#0d0d0d; --surface:#1a1a19;
+  --ink:#fff; --ink2:#c3c2b7; --muted:#898781;
+  --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+  --s1:#3987e5; --s2:#d95926;
+  --seq0:#15243a; --seq1:#173c6e; --seq2:#184f95; --seq3:#256abf;
+  --seq4:#3987e5; --seq5:#6da7ec; --seq6:#b7d3f6;
+  --seq0-ink:#ffffff; --seq1-ink:#ffffff; --seq2-ink:#ffffff; --seq3-ink:#ffffff;
+  --seq4-ink:#0b0b0b; --seq5-ink:#0b0b0b; --seq6-ink:#0b0b0b;
+  --divlo:#b7d3f6; --divlo2:#3987e5; --divmid:#383835; --divhi2:#a33f3f; --divhi:#e66767;
+  --divlo-ink:#0b0b0b; --divlo2-ink:#0b0b0b; --divmid-ink:#ffffff;
+  --divhi2-ink:#ffffff; --divhi-ink:#0b0b0b;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--page); color:var(--ink);
+  font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.wrap { max-width:1180px; margin:0 auto; padding:32px 20px 80px; }
+header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:8px; }
+h1 { font-size:26px; margin:0 0 4px; letter-spacing:-0.01em; }
+.sub { color:var(--ink2); font-size:13px; margin:0; }
+button.ghost {
+  background:var(--surface); color:var(--ink2); border:1px solid var(--ring);
+  border-radius:8px; padding:6px 12px; font:inherit; font-size:13px; cursor:pointer;
+}
+button.ghost:hover { color:var(--ink); }
+section { margin-top:36px; }
+h2 { font-size:17px; margin:0 0 4px; letter-spacing:-0.01em; }
+.note { color:var(--ink2); font-size:13px; margin:0 0 14px; max-width:74ch; }
+.card { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:18px; }
+
+/* stat tiles */
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:20px; }
+.tile { background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:14px 16px; }
+.tile .v { font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1.15; }
+.tile .v.sm { font-size:17px; line-height:1.3; }
+.tile .k { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:0.04em; margin-top:2px; }
+.tile .h { color:var(--ink2); font-size:12px; margin-top:6px; }
+
+/* controls */
+.controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
+.seg { display:inline-flex; background:var(--surface); border:1px solid var(--ring); border-radius:9px; padding:2px; }
+.seg button {
+  border:0; background:transparent; color:var(--ink2); font:inherit; font-size:13px;
+  padding:5px 11px; border-radius:7px; cursor:pointer;
+}
+.seg button[aria-pressed="true"] { background:var(--s1); color:#fff; }
+
+/* matrix */
+.mwrap { overflow-x:auto; }
+table.matrix { border-collapse:separate; border-spacing:2px; font-size:12px; }
+table.matrix th { font-weight:500; color:var(--ink2); white-space:nowrap; }
+table.matrix th.row { text-align:right; padding-right:8px; max-width:150px; overflow:hidden; text-overflow:ellipsis; }
+table.matrix th.col { height:104px; vertical-align:bottom; padding-bottom:6px; }
+table.matrix th.col span { display:inline-block; writing-mode:vertical-rl; transform:rotate(180deg); }
+table.matrix td {
+  width:44px; height:34px; text-align:center; border-radius:4px;
+  font-variant-numeric:tabular-nums; cursor:default; position:relative;
+}
+td.diag { background:repeating-linear-gradient(45deg,var(--grid) 0 3px,transparent 3px 6px); color:var(--muted); }
+td.nil { color:var(--muted); }
+td:hover { outline:2px solid var(--ink); outline-offset:-2px; }
+.corner { color:var(--muted); font-size:11px; font-weight:400; text-align:right; padding-right:8px; }
+
+/* legend */
+.legend { display:flex; align-items:center; gap:10px; margin-top:14px; flex-wrap:wrap; color:var(--ink2); font-size:12px; }
+.ramp { display:flex; gap:2px; }
+.ramp i { width:26px; height:12px; border-radius:2px; display:block; }
+.key { display:inline-flex; align-items:center; gap:6px; }
+.key i { width:11px; height:11px; border-radius:3px; display:inline-block; }
+
+/* tooltip */
+#tip {
+  position:fixed; z-index:50; pointer-events:none; opacity:0; transition:opacity .1s;
+  background:var(--surface); border:1px solid var(--ring); border-radius:9px;
+  padding:9px 11px; font-size:12px; line-height:1.5; box-shadow:0 6px 22px rgba(0,0,0,.16); max-width:250px;
+}
+#tip b { font-weight:600; }
+#tip .r { color:var(--ink2); }
+
+/* bars */
+.bars { display:grid; gap:9px; }
+.bar { display:grid; grid-template-columns:215px 1fr 104px; align-items:center; gap:12px; font-size:13px; }
+.bar .nm { color:var(--ink2); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.track { display:flex; gap:2px; height:16px; align-items:center; }
+.track i { height:16px; display:block; border-radius:0 4px 4px 0; }
+.track i:first-child { border-radius:4px 0 0 4px; }
+.track i:only-child { border-radius:4px; }
+.bar .vv { color:var(--ink2); font-variant-numeric:tabular-nums; font-size:12px; }
+
+/* table */
+table.data { width:100%; border-collapse:collapse; font-size:13px; }
+table.data th { text-align:right; color:var(--muted); font-weight:500; font-size:11px;
+  text-transform:uppercase; letter-spacing:0.04em; padding:0 10px 8px; border-bottom:1px solid var(--grid); }
+table.data th:first-child, table.data td:first-child { text-align:left; }
+table.data td { padding:8px 10px; border-bottom:1px solid var(--grid); text-align:right;
+  font-variant-numeric:tabular-nums; }
+table.data td.name { font-variant-numeric:normal; }
+table.data tr:last-child td { border-bottom:0; }
+.mini { display:inline-flex; height:9px; width:70px; background:var(--grid); border-radius:3px; overflow:hidden; vertical-align:middle; margin-left:8px; }
+.mini i { display:block; height:9px; }
+
+/* tree */
+.tree { font-size:13px; line-height:1.45; }
+.tree ul { list-style:none; margin:0; padding-left:19px; border-left:1px solid var(--grid); }
+.tree > ul { padding-left:0; border-left:0; }
+.tree li { padding:3px 0; position:relative; }
+.tree .who { font-weight:600; }
+.tree .msg { color:var(--ink2); }
+.dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:7px; vertical-align:1px; }
+.hidden { display:none; }
+.foot { color:var(--muted); font-size:12px; margin-top:26px; max-width:74ch; }
+.two { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:820px){ .two{grid-template-columns:1fr;} .bar{grid-template-columns:110px 1fr 80px;} }
+.emoji { font-size:15px; }
+
+/* claim section */
+.verdict { border-radius:12px; padding:18px 20px; border:1px solid var(--ring); background:var(--surface); }
+.verdict .tagline { font-size:19px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; }
+.verdict p { margin:0 0 8px; color:var(--ink2); max-width:80ch; }
+.verdict p:last-child { margin-bottom:0; }
+.verdict .badge { display:inline-block; font-size:11px; text-transform:uppercase;
+  letter-spacing:0.05em; font-weight:600; padding:3px 9px; border-radius:20px;
+  margin-bottom:10px; }
+.badge.no  { background:#e9a09f; color:#0b0b0b; }
+.badge.part{ background:#fab219; color:#0b0b0b; }
+.badge.yes { background:#0ca30c; color:#fff; }
+.grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:18px; }
+.dist { position:relative; height:96px; margin-top:16px; }
+.dist .col { position:absolute; bottom:20px; width:4px; background:var(--seq2); border-radius:2px 2px 0 0; }
+.dist .col.me { background:var(--s2); width:5px; }
+.dist .axl { position:absolute; bottom:0; font-size:11px; color:var(--muted); transform:translateX(-50%); }
+.dist .mark { position:absolute; bottom:20px; height:76px; border-left:2px dashed var(--s2); }
+.dist .mtag { position:absolute; font-size:11px; color:var(--s2); font-weight:600; white-space:nowrap; }
+.lift { display:grid; grid-template-columns:150px 1fr 1fr; gap:10px; align-items:center;
+  font-size:13px; padding:7px 0; }
+.lift .lb { color:var(--ink2); text-align:right; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.liftbar { position:relative; height:20px; background:linear-gradient(to right,var(--grid),var(--grid)) no-repeat center/1px 100%; }
+.liftbar i { position:absolute; top:3px; height:14px; border-radius:3px; }
+.liftbar b { position:absolute; top:2px; font-size:11px; font-weight:600; color:var(--ink2);
+  font-variant-numeric:tabular-nums; line-height:16px; }
+.hdr2 { display:grid; grid-template-columns:150px 1fr 1fr; gap:10px; font-size:11px;
+  color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; padding-bottom:6px;
+  border-bottom:1px solid var(--grid); margin-bottom:4px; }
+.hdr2 span:first-child { text-align:right; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1 id="title">Who talks to whom</h1>
+    <p class="sub" id="subtitle"></p>
+  </div>
+  <button class="ghost" id="theme">Dark mode</button>
+</header>
+
+<div class="tiles" id="tiles"></div>
+
+<!-- ============ MATRIX ============ -->
+<section>
+  <h2>Reply &amp; reaction matrix</h2>
+  <p class="note">
+    Rows are the person <b>doing</b> the replying or reacting; columns are the person
+    <b>receiving</b> it. Raw counts mostly just re-tell you who talks the most — the
+    <b>affinity</b> view divides each cell by what you'd expect if people replied at random
+    in proportion to how much everyone posts, so it shows genuine preference.
+  </p>
+  <div class="controls">
+    <div class="seg" id="layer">
+      <button data-v="reply" aria-pressed="true">Replies</button>
+      <button data-v="react" aria-pressed="false">Reactions</button>
+    </div>
+    <div class="seg" id="scale">
+      <button data-v="raw" aria-pressed="true">Raw count</button>
+      <button data-v="row" aria-pressed="false">% of row</button>
+      <button data-v="aff" aria-pressed="false">Affinity</button>
+    </div>
+    <button class="ghost" id="tableToggle">Show as table</button>
+  </div>
+  <div class="card">
+    <div class="mwrap"><div id="matrix"></div></div>
+    <div class="legend" id="mlegend"></div>
+  </div>
+  <div class="card hidden" id="matrixTable" style="margin-top:12px; overflow-x:auto"></div>
+</section>
+
+<!-- ============ PAIRS ============ -->
+<section>
+  <h2>Strongest pairs</h2>
+  <p class="note">
+    Total replies exchanged, split by direction. <b>Lift</b> is the pair's combined reply
+    count over its expected count — above 1.0 means these two seek each other out more than
+    their posting volumes alone would explain.
+  </p>
+  <div class="card">
+    <div class="legend" style="margin:0 0 14px">
+      <span class="key"><i style="background:var(--s1)"></i> left name → right name</span>
+      <span class="key"><i style="background:var(--s2)"></i> right name → left name</span>
+    </div>
+    <div class="bars" id="pairs"></div>
+  </div>
+</section>
+
+<!-- ============ PEOPLE ============ -->
+<section>
+  <h2>People</h2>
+  <p class="note">
+    <b>Reply rate</b> is the share of a person's own messages that are replies — how reactive
+    they are. <b>Reply-in rate</b> is replies received per message posted — how much of a
+    magnet their messages are. <b>Median response</b> is how fast they answer.
+  </p>
+  <div class="card" style="overflow-x:auto"><div id="people"></div></div>
+</section>
+
+<!-- ============ REACTIONS ============ -->
+<section>
+  <h2>Reactions</h2>
+  <div class="two">
+    <div class="card">
+      <h2 style="font-size:14px">Most-used emoji</h2>
+      <p class="note" style="margin-bottom:12px">Across every reaction in the export.</p>
+      <div class="bars" id="emoji"></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:14px">Given vs received</h2>
+      <p class="note" style="margin-bottom:12px">
+        Reactions each person hands out against reactions their messages collect.
+      </p>
+      <div id="giveGet"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ THREADS ============ -->
+<section>
+  <h2>Thread shape</h2>
+  <p class="note">
+    Every reply chain reconstructed into a tree. Most are a single back-and-forth; long
+    branching threads are rare, which is what makes the matrix above the better lens on this
+    chat than a literal tree drawing.
+  </p>
+  <div class="two">
+    <div class="card">
+      <h2 style="font-size:14px">Messages per thread</h2>
+      <div class="bars" id="sizeHist" style="margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <h2 style="font-size:14px">Reply depth</h2>
+      <div class="bars" id="depthHist" style="margin-top:14px"></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>The biggest threads</h2>
+  <p class="note">The actual message trees — indentation is reply depth.</p>
+  <div class="controls">
+    <div class="seg" id="treePick"></div>
+  </div>
+  <div class="card tree" id="tree"></div>
+</section>
+
+<!-- ============ CLIQUE CLAIM ============ -->
+<section id="claim">
+  <h2>Claim check: do these four talk mostly to each other?</h2>
+  <p class="note">
+    The claim under test is that <b id="claimNames"></b> interact with each other far
+    more than with everyone else. Raw counts cannot settle it. Three of the four are
+    among the heaviest posters in the chat, so they rack up big numbers with
+    <i>everyone</i>. Every figure below is measured against the same null model the
+    matrix uses, <b>what you would expect if people replied and reacted purely in
+    proportion to how much everyone posts</b>. 1.00× means exactly as much as their
+    volume predicts.
+  </p>
+  <div id="verdict"></div>
+  <div class="controls" style="margin-top:18px">
+    <div class="seg" id="cLayer">
+      <button data-v="reply" aria-pressed="true">Replies</button>
+      <button data-v="react" aria-pressed="false">Reactions</button>
+    </div>
+  </div>
+  <div id="claimBody"></div>
+</section>
+
+<p class="foot" id="foot"></p>
+</div>
+
+<div id="tip"></div>
+<script src="data.js"></script>
+<script src="clique.js"></script>
+<script>
+const D = window.DATA, P = D.people, N = P.length;
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
+const fmt = n => n.toLocaleString('en-US');
+const pct = x => (x * 100).toFixed(0) + '%';
+const short = s => s.length > 16 ? s.slice(0, 15) + '…' : s;
+const ordinal = n => {
+  const t = n % 100;
+  if (t >= 11 && t <= 13) return n + 'th';
+  return n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+};
+
+function dur(s) {
+  if (s == null) return '—';
+  if (s < 60) return s + 's';
+  if (s < 3600) return Math.round(s / 60) + 'm';
+  if (s < 86400) return (s / 3600).toFixed(1) + 'h';
+  return (s / 86400).toFixed(1) + 'd';
+}
+
+/* ---------- header + tiles ---------- */
+const from = D.range[0].slice(0, 10), to = D.range[1].slice(0, 10);
+$('#title').textContent = D.chat;
+$('#subtitle').textContent =
+  `${fmt(D.totals.messages)} messages · ${N} regulars · ${from} → ${to}`;
+
+const deepest = D.deepThreads[0], bigThread = D.topThreads[0];
+const busiest = D.profile.reduce((a, b) => a.messages > b.messages ? a : b);
+const mostReactive = D.profile.reduce((a, b) => a.replyRate > b.replyRate ? a : b);
+const magnet = D.profile.reduce((a, b) => a.reactionsPerMsg > b.reactionsPerMsg ? a : b);
+const topPair = D.pairs[0];
+
+const tiles = [
+  [fmt(D.totals.messages), 'Messages', `${fmt(D.totals.replies)} of them are replies (${pct(D.totals.replies / D.totals.messages)})`],
+  [fmt(D.totals.reactionsTotal), 'Reactions', `${(D.totals.reactionsTotal / D.totals.messages).toFixed(2)} per message`],
+  [fmt(D.totals.threads), 'Threads', `longest runs ${bigThread.size} messages, ${deepest.depth} deep`],
+  [P[topPair.a] + ' ↔ ' + P[topPair.b], 'Closest pair', `${topPair.total} replies exchanged, ${topPair.lift.toFixed(2)}× expected`, 1],
+  [mostReactive.name, 'Most reactive', `${pct(mostReactive.replyRate)} of their messages are replies`, 1],
+  [magnet.name, 'Biggest magnet', `${magnet.reactionsPerMsg} reactions per message`, 1],
+];
+tiles.forEach(([v, k, h, small]) => {
+  const t = el('div', 'tile');
+  t.append(el('div', 'v' + (small ? ' sm' : ''), v), el('div', 'k', k), el('div', 'h', h));
+  $('#tiles').append(t);
+});
+
+/* ---------- tooltip ---------- */
+const tip = $('#tip');
+function showTip(e, html) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let x = e.clientX + 14, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+const hideTip = () => tip.style.opacity = 0;
+
+/* ---------- matrix ---------- */
+// each step carries its own ink token, so fill and text can never drift apart across modes
+const SEQ_T = ['--seq0', '--seq1', '--seq2', '--seq3', '--seq4', '--seq5', '--seq6'];
+const DIV_T = ['--divlo', '--divlo2', '--divmid', '--divhi2', '--divhi'];
+const SEQ = SEQ_T.map(v => `var(${v})`);
+const DIV = DIV_T.map(v => `var(${v})`);
+const ink = t => `var(${t}-ink)`;
+
+const qs = new URLSearchParams(location.search);
+let layer = ['reply', 'react'].includes(qs.get('layer')) ? qs.get('layer') : 'reply';
+let scale = ['raw', 'row', 'aff'].includes(qs.get('scale')) ? qs.get('scale') : 'raw';
+[['#layer', layer], ['#scale', scale]].forEach(([sel, v]) =>
+  [...$(sel).children].forEach(b => b.setAttribute('aria-pressed', b.dataset.v === v)));
+
+function seqStep(t) { // t in 0..1 -> index into SEQ_T, or -1 for "no fill"
+  if (!(t > 0)) return -1;
+  return Math.min(SEQ_T.length - 1, Math.ceil(Math.min(t, 1) * (SEQ_T.length - 1)));
+}
+function divStep(v) { // log2 ratio -> index into DIV_T, or -1 when unknown
+  if (v == null) return -1;
+  if (v <= -1.5) return 0;
+  if (v < -0.4) return 1;
+  if (v <= 0.4) return 2;
+  if (v < 1.5) return 3;
+  return 4;
+}
+const paint = (tokens, i) =>
+  i < 0 ? { bg: 'transparent', fg: 'var(--ink2)' }
+        : { bg: `var(${tokens[i]})`, fg: ink(tokens[i]) };
+
+function drawMatrix() {
+  const M = layer === 'reply' ? D.reply : D.react;
+  const E = layer === 'reply' ? D.expected : D.reactExpected;
+  const A = layer === 'reply' ? D.affinity : D.reactAffinity;
+  const verb = layer === 'reply' ? 'replies' : 'reactions';
+  const rowTot = M.map(r => r.reduce((a, b) => a + b, 0));
+
+  let max = 0;
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) if (i !== j) max = Math.max(max, M[i][j]);
+
+  const t = el('table', 'matrix');
+  const head = el('tr');
+  head.append(el('th', 'corner', layer === 'reply' ? 'replier ↓ / replied to →' : 'reacted ↓ / reacted to →'));
+  P.forEach(p => { const th = el('th', 'col'); th.append(el('span', null, p)); head.append(th); });
+  t.append(head);
+
+  for (let i = 0; i < N; i++) {
+    const tr = el('tr');
+    tr.append(el('th', 'row', P[i]));
+    for (let j = 0; j < N; j++) {
+      const td = el('td');
+      if (i === j) {
+        td.className = 'diag';
+        td.textContent = M[i][j] || '';
+        td.title = 'self-' + verb;
+      } else {
+        const raw = M[i][j];
+        let label, c;
+        if (scale === 'raw') {
+          // sqrt scale: reply counts are heavily skewed, linear leaves most cells indistinguishable
+          c = paint(SEQ_T, seqStep(max ? Math.sqrt(raw / max) : 0));
+          label = raw || '·';
+        } else if (scale === 'row') {
+          const share = rowTot[i] ? raw / rowTot[i] : 0;
+          c = paint(SEQ_T, seqStep(share / 0.45));
+          label = rowTot[i] ? (share * 100).toFixed(0) : '·';
+        } else {
+          const a = A[i][j];
+          c = paint(DIV_T, divStep(a));
+          label = a == null ? '·' : (a > 0 ? '+' : '') + a.toFixed(1);
+        }
+        if (label === '·') td.classList.add('nil');
+        td.style.background = c.bg; td.style.color = c.fg; td.textContent = label;
+        const gap = D.medianGap[i][j];
+        const ratio = E[i][j] > 0 ? (raw / E[i][j]) : null;
+        const html =
+          `<b>${P[i]} → ${P[j]}</b><br>` +
+          `${fmt(raw)} ${verb}<br>` +
+          `<span class="r">expected ${E[i][j]} · ${ratio ? ratio.toFixed(2) + '× ' + (ratio >= 1 ? 'more' : 'less') + ' than expected' : 'n/a'}</span><br>` +
+          `<span class="r">${pct(rowTot[i] ? raw / rowTot[i] : 0)} of ${P[i]}'s ${verb}</span>` +
+          (layer === 'reply' && gap != null ? `<br><span class="r">median response ${dur(gap)}</span>` : '');
+        td.addEventListener('mousemove', e => showTip(e, html));
+        td.addEventListener('mouseleave', hideTip);
+      }
+      tr.append(td);
+    }
+    t.append(tr);
+  }
+  $('#matrix').replaceChildren(t);
+
+  // legend
+  const lg = $('#mlegend');
+  if (scale === 'aff') {
+    lg.innerHTML =
+      `<span>far less than expected</span><span class="ramp">` +
+      DIV.map(c => `<i style="background:${c}"></i>`).join('') +
+      `</span><span>far more</span><span style="margin-left:10px" class="r">` +
+      `values are log₂(observed ÷ expected); “·” = too few expected ${verb} to judge</span>`;
+  } else if (scale === 'row') {
+    lg.innerHTML = `<span>0%</span><span class="ramp">` +
+      SEQ.map(c => `<i style="background:${c}"></i>`).join('') +
+      `</span><span>45%+ of the row's ${verb}</span>`;
+  } else {
+    lg.innerHTML = `<span>0</span><span class="ramp">` +
+      SEQ.map(c => `<i style="background:${c}"></i>`).join('') +
+      `</span><span>${fmt(max)} ${verb}</span>` +
+      `<span style="margin-left:10px" class="r">square-root scale — counts are skewed, so a linear ramp would flatten most cells</span>`;
+  }
+  drawMatrixTable(M, verb);
+}
+
+function drawMatrixTable(M, verb) {
+  const t = el('table', 'data');
+  const h = el('tr');
+  h.append(el('th', null, `${verb} from ↓ / to →`));
+  P.forEach(p => h.append(el('th', null, short(p))));
+  h.append(el('th', null, 'total'));
+  t.append(h);
+  M.forEach((row, i) => {
+    const tr = el('tr');
+    tr.append(el('td', 'name', P[i]));
+    row.forEach((v, j) => tr.append(el('td', null, i === j ? '–' : fmt(v))));
+    tr.append(el('td', null, '<b>' + fmt(row.reduce((a, b) => a + b, 0)) + '</b>'));
+    t.append(tr);
+  });
+  $('#matrixTable').replaceChildren(t);
+}
+
+function wireSeg(sel, cb) {
+  $(sel).addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...$(sel).children].forEach(x => x.setAttribute('aria-pressed', x === b));
+    cb(b.dataset.v);
+  });
+}
+wireSeg('#layer', v => { layer = v; drawMatrix(); });
+wireSeg('#scale', v => { scale = v; drawMatrix(); });
+$('#tableToggle').addEventListener('click', () => {
+  const c = $('#matrixTable'), hid = c.classList.toggle('hidden');
+  $('#tableToggle').textContent = hid ? 'Show as table' : 'Hide table';
+});
+drawMatrix();
+
+/* ---------- pairs ---------- */
+(function () {
+  const rows = D.pairs.slice(0, 14);
+  const max = rows[0].total;
+  rows.forEach(p => {
+    const b = el('div', 'bar');
+    b.append(el('div', 'nm', `${P[p.a]} ↔ ${P[p.b]}`));
+    const tr = el('div', 'track');
+    const w = v => (v / max) * 100 * 0.92;
+    const i1 = el('i'); i1.style.cssText = `background:var(--s1);width:${w(p.ab)}%`;
+    const i2 = el('i'); i2.style.cssText = `background:var(--s2);width:${w(p.ba)}%`;
+    tr.append(i1, i2);
+    b.append(tr, el('div', 'vv', `${fmt(p.total)} · ${p.lift.toFixed(2)}×`));
+    const html = `<b>${P[p.a]} ↔ ${P[p.b]}</b><br>${P[p.a]} → ${P[p.b]}: ${p.ab}<br>` +
+      `${P[p.b]} → ${P[p.a]}: ${p.ba}<br><span class="r">expected ${p.expected} total · ` +
+      `${p.lift}× that</span>`;
+    b.addEventListener('mousemove', e => showTip(e, html));
+    b.addEventListener('mouseleave', hideTip);
+    $('#pairs').append(b);
+  });
+})();
+
+/* ---------- people table ---------- */
+(function () {
+  const cols = [
+    ['Person', p => `<span class="name">${p.name}</span>`],
+    ['Messages', p => fmt(p.messages)],
+    ['Replies sent', p => fmt(p.repliesOut)],
+    ['Replies got', p => fmt(p.repliesIn)],
+    ['Reply rate', p => barCell(p.replyRate, 0.5)],
+    ['Reply-in rate', p => barCell(p.repliedToRate, 0.5)],
+    ['Median response', p => dur(p.medianReplySec)],
+    ['Threads started', p => fmt(p.threadsStarted)],
+    ['React given', p => fmt(p.reactionsGiven)],
+    ['React got', p => fmt(p.reactionsGot)],
+    ['React / msg', p => p.reactionsPerMsg.toFixed(2)],
+  ];
+  function barCell(v, m) {
+    return `${pct(v)}<span class="mini"><i style="background:var(--s1);width:${Math.min(100, v / m * 100)}%"></i></span>`;
+  }
+  const t = el('table', 'data');
+  const h = el('tr'); cols.forEach(c => h.append(el('th', null, c[0]))); t.append(h);
+  D.profile.forEach(p => {
+    const tr = el('tr');
+    cols.forEach((c, i) => tr.append(el('td', i === 0 ? 'name' : null, c[1](p))));
+    t.append(tr);
+  });
+  $('#people').replaceChildren(t);
+})();
+
+/* ---------- emoji ---------- */
+(function () {
+  const rows = D.topEmoji.slice(0, 12), max = rows[0][1];
+  rows.forEach(([e, c]) => {
+    const b = el('div', 'bar');
+    b.append(el('div', 'nm emoji', e === '⭐' ? '⭐ <span style="font-size:12px">(custom)</span>' : e));
+    const tr = el('div', 'track');
+    const i = el('i'); i.style.cssText = `background:var(--s1);width:${c / max * 100 * 0.94}%`;
+    tr.append(i); b.append(tr, el('div', 'vv', fmt(c)));
+    $('#emoji').append(b);
+  });
+})();
+
+/* ---------- given vs received ---------- */
+(function () {
+  const rows = [...D.profile].sort((a, b) => b.reactionsGot - a.reactionsGot);
+  const max = Math.max(...rows.map(p => Math.max(p.reactionsGiven, p.reactionsGot)));
+  const t = el('table', 'data');
+  t.append(el('tr', null,
+    '<th>Person</th><th>Given</th><th>Received</th><th style="width:46%">&nbsp;</th>'));
+  rows.forEach(p => {
+    const tr = el('tr');
+    tr.append(el('td', 'name', p.name), el('td', null, fmt(p.reactionsGiven)), el('td', null, fmt(p.reactionsGot)));
+    const cell = el('td');
+    cell.style.textAlign = 'left';
+    cell.innerHTML =
+      `<div style="display:flex;gap:2px;height:8px;margin-bottom:3px"><i style="background:var(--s1);width:${p.reactionsGiven / max * 100}%;border-radius:3px"></i></div>` +
+      `<div style="display:flex;gap:2px;height:8px"><i style="background:var(--s2);width:${p.reactionsGot / max * 100}%;border-radius:3px"></i></div>`;
+    tr.append(cell); t.append(tr);
+  });
+  const wrap = el('div');
+  wrap.append(t);
+  wrap.append(el('div', 'legend',
+    '<span class="key"><i style="background:var(--s1)"></i> given</span>' +
+    '<span class="key"><i style="background:var(--s2)"></i> received</span>'));
+  $('#giveGet').replaceChildren(wrap);
+})();
+
+/* ---------- histograms ---------- */
+function hist(target, data, labelFn, capLabel) {
+  const max = Math.max(...data.map(d => d[1]));
+  data.forEach(([k, v]) => {
+    const b = el('div', 'bar');
+    b.append(el('div', 'nm', labelFn(k)));
+    const tr = el('div', 'track');
+    const i = el('i'); i.style.cssText = `background:var(--s1);width:${v / max * 100 * 0.94}%`;
+    tr.append(i); b.append(tr, el('div', 'vv', fmt(v)));
+    $(target).append(b);
+  });
+}
+hist('#sizeHist', D.threadSizeHist, k => k >= 20 ? '20+' : k + ' msgs');
+hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level' : k + ' levels'));
+
+/* ---------- trees ---------- */
+(function () {
+  const trees = D.sampleTrees, metas = D.topThreads;
+  const seg = $('#treePick');
+  trees.forEach((_, i) => {
+    const b = el('button', null, `${metas[i].size} messages`);
+    b.dataset.v = i; b.setAttribute('aria-pressed', i === 0);
+    seg.append(b);
+  });
+  function render(i) {
+    const meta = metas[i];
+    const box = $('#tree');
+    box.replaceChildren();
+    box.append(el('p', 'note',
+      `Started by <b>${meta.starter}</b> on ${meta.date.slice(0, 10)} · ` +
+      `${meta.people} people · ${meta.depth} levels deep`));
+    const build = node => {
+      const li = el('li');
+      const name = node.who >= 0 ? P[node.who] : '?';
+      const txt = (node.text || '').replace(/[<>&]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+      li.innerHTML = `<span class="dot" style="background:var(--s1)"></span>` +
+        `<span class="who">${name}</span> <span class="msg">${txt || '—'}</span>`;
+      if (node.kids.length) {
+        const ul = el('ul');
+        node.kids.forEach(k => ul.append(build(k)));
+        li.append(ul);
+      }
+      return li;
+    };
+    const root = el('ul');
+    root.append(build(trees[i]));
+    const w = el('div', 'tree'); w.append(root);
+    box.append(w);
+  }
+  seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    [...seg.children].forEach(x => x.setAttribute('aria-pressed', x === b));
+    render(+b.dataset.v);
+  });
+  render(0);
+})();
+
+/* ---------- claim check ---------- */
+(function () {
+  const C = window.CLIQUE;
+  $('#claimNames').textContent = C.group.join(', ') + ' (ゴードン = @redacted7)';
+  let cl = 'reply';
+
+  // lift bar: 1.0x sits at centre, left = less than expected, right = more
+  function liftBar(v, cap = 2) {
+    if (v == null) return '<div class="liftbar"></div>';
+    const c = Math.max(-1, Math.min(1, Math.log2(v) / Math.log2(cap)));
+    const half = 50, x = half + c * half;
+    const w = Math.abs(x - half);
+    const up = v >= 1;
+    const col = up ? 'var(--divhi)' : 'var(--divlo2)';
+    const ink = up ? 'var(--divhi-ink)' : 'var(--divlo2-ink)';
+    const lab = v.toFixed(2) + '×';
+    const side = up ? `left:${half}%;width:${w}%` : `left:${x}%;width:${w}%`;
+    // long bars would push an outside label into the neighbouring column,
+    // so past the halfway mark the value moves inside the bar
+    const outside = up ? x < 84 : x > 16;
+    const tx = outside
+      ? (up ? `left:calc(${x}% + 6px)` : `right:calc(${100 - x}% + 6px)`)
+      : (up ? `left:calc(${x}% - 6px);transform:translateX(-100%);color:${ink}`
+            : `right:calc(${100 - x}% - 6px);transform:translateX(100%);color:${ink}`);
+    return `<div class="liftbar"><i style="${side};background:${col}"></i><b style="${tx}">${lab}</b></div>`;
+  }
+
+  function verdict() {
+    const box = el('div', 'verdict');
+    const reply = C.layers.reply, react = C.layers.react;
+    const trio = reply.trios[0];                       // the trio that scores highest
+    const weakest = reply.swaps.reduce((a, b) => a.beats > b.beats ? a : b);
+    const inward = [...reply.members].sort((a, b) => b.shareInternal - a.shareInternal);
+    const most = inward[0], loose = inward.slice(-2).reverse();
+    const coldPair = reply.pairs[reply.pairs.length - 1];
+    box.innerHTML =
+      `<span class="badge part">Partly true, but not as stated</span>` +
+      `<p class="tagline">There is a real cluster here. It is not these four.</p>` +
+
+      `<p><b>The effect is real.</b> The four send ${fmt(reply.obs)} replies to each other
+       where posting volume predicts ${fmt(reply.exp)}, so ${reply.cohesion.toFixed(2)}× expected.
+       It sits ${reply.null.z} standard deviations above the null model, which never once
+       produced a number this high across ${fmt(reply.null.trials)} simulated chats. Three of
+       them are among the heaviest posters, and this survives correcting for that.</p>` +
+
+      `<p><b>It is also small.</b> Of the ${fmt(reply.totalCombos)} foursomes you can draw from
+       this chat, ${reply.rank - 1} keep to themselves more than this one does. The group ranks
+       ${ordinal(reply.rank)}. The tightest reaches ${reply.top[0].coh.toFixed(2)}×.</p>` +
+
+      `<p><b>${weakest.member} is where the claim breaks.</b> Take
+       ${weakest.member} out and cohesion climbs from ${reply.cohesion.toFixed(2)}× to
+       ${trio.coh.toFixed(2)}×. All ${weakest.options} outsiders would make a tighter group in
+       that slot. ${coldPair.a} and ${coldPair.b} reply to each other at
+       ${coldPair.lift.toFixed(2)}×, about half what their volumes predict. The cluster that
+       does exist is ${trio.members.join(', ')}, and it rests on
+       ${reply.pairs[0].a} and ${reply.pairs[0].b} at ${reply.pairs[0].lift.toFixed(2)}×.</p>` +
+
+      `<p><b>Nobody talks only to the group.</b> ${most.name} is the most inward of the four,
+       keeping ${pct(most.shareInternal)} of replies inside it against
+       ${pct(most.shareInternalExp)} expected. Even so, ${pct(1 - most.shareInternal)} of
+       ${most.name}'s replies go to outsiders. ${loose[0].name} and ${loose[1].name} sit at
+       ${loose[0].toGroupLift.toFixed(2)}× and ${loose[1].toGroupLift.toFixed(2)}×, which is
+       baseline.</p>` +
+
+      `<p><b>Reactions show nothing.</b> There the four score ${react.cohesion.toFixed(2)}×,
+       slightly below what volume predicts, ranking ${react.rank} of ${fmt(react.totalCombos)}.
+       A group that really kept to itself would cluster on reactions too.</p>`;
+    return box;
+  }
+
+  function render() {
+    const L = C.layers[cl];
+    const body = $('#claimBody');
+    body.replaceChildren();
+
+    // headline numbers
+    const tiles = el('div', 'tiles');
+    [[L.cohesion.toFixed(2) + '×', 'Cohesion', `${fmt(L.obs)} observed vs ${fmt(L.exp)} expected`],
+     [`#${L.rank}`, `of ${fmt(L.totalCombos)} foursomes`, `ranked by how inward-facing they are`],
+     [L.null.z > 0 ? '+' + L.null.z : String(L.null.z), 'Standard deviations', `above the volume-matched null model`],
+     [pct(C.groupMsgShare), 'Share of all messages', `posted by these four`],
+    ].forEach(([v, k, h]) => {
+      const t = el('div', 'tile');
+      t.append(el('div', 'v', v), el('div', 'k', k), el('div', 'h', h));
+      tiles.append(t);
+    });
+    body.append(tiles);
+
+    // distribution of all 495 foursomes
+    const dist = el('div', 'card');
+    dist.style.marginTop = '18px';
+    dist.append(el('h2', null, 'Where they sit among every possible foursome'));
+    dist.append(el('p', 'note',
+      `Each bar is one of the ${fmt(L.totalCombos)} ways to pick four people from this chat, ` +
+      `binned by cohesion. If the claim were that this group stands apart, they would sit ` +
+      `alone at the right edge.`));
+    const vals = L.allCohesion, lo = vals[0], hi = vals[vals.length - 1];
+    const BINS = 46, bins = new Array(BINS).fill(0);
+    vals.forEach(v => bins[Math.min(BINS - 1, Math.floor((v - lo) / (hi - lo) * BINS))]++);
+    const meBin = Math.min(BINS - 1, Math.floor((L.cohesion - lo) / (hi - lo) * BINS));
+    const bmax = Math.max(...bins);
+    const plot = el('div', 'dist');
+    bins.forEach((b, i) => {
+      const c = el('div', 'col' + (i === meBin ? ' me' : ''));
+      c.style.cssText += `left:${i / BINS * 100}%;height:${Math.max(2, b / bmax * 72)}px`;
+      c.title = `${b} foursomes`;
+      plot.append(c);
+    });
+    [lo, 1, hi].forEach(v => {
+      const x = (v - lo) / (hi - lo) * 100;
+      const a = el('div', 'axl', v.toFixed(2) + '×');
+      a.style.left = x + '%';
+      plot.append(a);
+      if (v === 1) {
+        const m = el('div', 'mark');
+        m.style.cssText += `left:${x}%;border-color:var(--axis)`;
+        plot.append(m);
+      }
+    });
+    const tag = el('div', 'mtag', `these four, ${L.cohesion.toFixed(2)}×`);
+    tag.style.cssText += `left:${Math.min(72, meBin / BINS * 100)}%;top:0`;
+    plot.append(tag);
+    dist.append(plot);
+    dist.append(el('div', 'legend',
+      `<span class="key"><i style="background:var(--s2)"></i> the four in question</span>` +
+      `<span class="key"><i style="background:var(--seq2)"></i> every other foursome</span>` +
+      `<span class="r">dashed line = 1.00×, exactly what posting volume predicts</span>`));
+    body.append(dist);
+
+    // per-member: inward vs outward
+    const mem = el('div', 'card');
+    mem.style.marginTop = '18px';
+    mem.append(el('h2', null, 'Is each of them actually inward-facing?'));
+    mem.append(el('p', 'note',
+      `Left column: their ${cl === 'reply' ? 'replies' : 'reactions'} to the other three, ` +
+      `against expectation. Right column: the same toward the eight people outside the group. ` +
+      `A real clique member is high on the left and low on the right.`));
+    mem.append(el('div', 'hdr2',
+      '<span></span><span>toward the other three</span><span>toward everyone else</span>'));
+    L.members.forEach(m => {
+      const r = el('div', 'lift');
+      r.append(el('div', 'lb', `${m.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(m.messages)} msgs</span>`));
+      r.append(el('div', null, liftBar(m.toGroupLift)));
+      r.append(el('div', null, liftBar(m.toRestLift)));
+      const html = `<b>${m.name}</b><br>to the group: ${fmt(m.toGroup)} vs ${m.toGroupExp} expected<br>` +
+        `to outsiders: ${fmt(m.toRest)} vs ${m.toRestExp} expected<br>` +
+        `<span class="r">${pct(m.shareInternal)} of their output stays inside (expected ${pct(m.shareInternalExp)})</span>`;
+      r.addEventListener('mousemove', e => showTip(e, html));
+      r.addEventListener('mouseleave', hideTip);
+      mem.append(r);
+    });
+    body.append(mem);
+
+    const two = el('div', 'two');
+    two.style.marginTop = '18px';
+
+    // drop-one test
+    const drop = el('div', 'card');
+    drop.append(el('h2', null, 'Who actually holds it together'));
+    drop.append(el('p', 'note',
+      'Cohesion of the remaining trio when each member is removed. If cohesion ' +
+      '<i>rises</i> without someone, that person was diluting the group, not forming it.'));
+    const dt = el('table', 'data');
+    dt.append(el('tr', null, '<th>Remove</th><th>Remaining trio</th><th>Cohesion</th><th>vs all four</th>'));
+    L.trios.forEach(t => {
+      const delta = t.coh - L.cohesion;
+      const tr = el('tr');
+      tr.append(el('td', 'name', t.without),
+        el('td', 'name', `<span style="font-size:12px">${t.members.join(' + ')}</span>`),
+        el('td', null, t.coh.toFixed(2) + '×'),
+        el('td', null, `<span style="color:${delta > 0 ? 'var(--divhi)' : 'var(--divlo2)'}">` +
+          `${delta > 0 ? '+' : ''}${delta.toFixed(2)}</span>`));
+      dt.append(tr);
+    });
+    drop.append(dt);
+    two.append(drop);
+
+    // internal pairs
+    const pr = el('div', 'card');
+    pr.append(el('h2', null, 'The six pairs inside the group'));
+    pr.append(el('p', 'note', 'Cohesion is an average, so it hides that some of these pairs barely engage.'));
+    const ph = el('div', 'hdr2', '<span></span><span>observed vs expected</span>');
+    ph.style.gridTemplateColumns = '195px 1fr';
+    pr.append(ph);
+    L.pairs.forEach(p => {
+      const r = el('div', 'lift');
+      r.style.gridTemplateColumns = '195px 1fr';
+      r.append(el('div', 'lb', `${p.a} ↔ ${p.b}`));
+      r.append(el('div', null, liftBar(p.lift)));
+      const html = `<b>${p.a} ↔ ${p.b}</b><br>${fmt(p.obs)} vs ${p.exp} expected`;
+      r.addEventListener('mousemove', e => showTip(e, html));
+      r.addEventListener('mouseleave', hideTip);
+      pr.append(r);
+    });
+    two.append(pr);
+    body.append(two);
+
+    // outsiders
+    const outs = el('div', 'card');
+    outs.style.marginTop = '18px';
+    outs.append(el('h2', null, 'How the group treats everyone else'));
+    outs.append(el('p', 'note',
+      `Left: ${cl === 'reply' ? 'replies' : 'reactions'} each outsider <b>receives</b> from the four, ` +
+      `against expectation. Right: what that outsider <b>sends</b> back. Someone frozen out would ` +
+      `sit far left on the receiving side.`));
+    outs.append(el('div', 'hdr2',
+      '<span></span><span>gets from the four</span><span>gives to the four</span>'));
+    L.outsiders.forEach(o => {
+      const r = el('div', 'lift');
+      r.append(el('div', 'lb', `${o.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(o.messages)} msgs</span>`));
+      r.append(el('div', null, liftBar(o.fromGroupLift)));
+      r.append(el('div', null, liftBar(o.toGroupLift)));
+      const html = `<b>${o.name}</b><br>receives ${fmt(o.fromGroup)} vs ${o.fromGroupExp} expected<br>` +
+        `sends ${fmt(o.toGroup)} vs ${o.toGroupExp} expected`;
+      r.addEventListener('mousemove', e => showTip(e, html));
+      r.addEventListener('mouseleave', hideTip);
+      outs.append(r);
+    });
+    body.append(outs);
+  }
+
+  $('#verdict').append(verdict());
+  wireSeg('#cLayer', v => { cl = v; render(); });
+  render();
+})();
+
+/* ---------- footnote ---------- */
+$('#foot').innerHTML =
+  `Built from the Telegram JSON export. Only the ${N} accounts with 50+ messages are shown. ` +
+  `${fmt(D.totals.danglingReplies)} replies point at messages outside the export and are dropped. ` +
+  `Telegram only names the most recent reactors per emoji, so ` +
+  `${fmt(D.totals.reactionsAttributed)} of ${fmt(D.totals.reactionsTotal)} reactions ` +
+  `(${pct(D.totals.reactionsAttributed / D.totals.reactionsTotal)}) could be attributed to a sender — ` +
+  `the reaction matrix is that subset, while per-person “received” totals use the full counts.`;
+
+/* ---------- theme ---------- */
+if (qs.get('theme') === 'dark') {
+  document.documentElement.dataset.theme = 'dark';
+  $('#theme').textContent = 'Light mode';
+}
+$('#theme').addEventListener('click', () => {
+  const dark = document.documentElement.dataset.theme === 'dark';
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+  $('#theme').textContent = dark ? 'Dark mode' : 'Light mode';
+});
+</script>
+</body>
+</html>
