@@ -5,6 +5,49 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="A visual breakdown of who replies to whom in a Telegram group chat.">
 <title>Who talks to whom</title>
+<script>
+/* Theme resolution, inline and before first paint so the page never flashes
+   the wrong colours. The preference is one of system/light/dark and persists
+   in localStorage; ?theme= overrides it once, so a shared link opens looking
+   the way the sharer saw it. Switching chat or album window is a real
+   navigation, so without the stored value the choice would reset every time.
+
+   localStorage throws in Safari's private mode, hence the try/catch. */
+(function () {
+  var THEMES = ['system', 'light', 'dark'];
+  var asked = new URLSearchParams(location.search).get('theme');
+  var saved = null;
+  try { saved = localStorage.getItem('theme'); } catch (e) {}
+
+  var pref = THEMES.indexOf(asked) > -1 ? asked
+           : THEMES.indexOf(saved) > -1 ? saved
+           : 'system';
+
+  var media = window.matchMedia('(prefers-color-scheme: dark)');
+  var paint = function () {
+    var dark = pref === 'dark' || (pref === 'system' && media.matches);
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  };
+
+  // In system mode, track the OS flipping while the page is open. The button
+  // label says "system" either way, so only the colours need to change.
+  media.addEventListener('change', function () { if (pref === 'system') paint(); });
+
+  // Exposed for the toggle at the end of the body, which cannot run this early
+  // because the button does not exist yet.
+  window.THEME = {
+    order: THEMES,
+    get: function () { return pref; },
+    set: function (next) {
+      pref = next;
+      try { localStorage.setItem('theme', next); } catch (e) {}
+      paint();
+    },
+  };
+
+  paint();
+})();
+</script>
 <style>
 :root {
   color-scheme: light;
@@ -223,7 +266,9 @@ table.data tr:last-child td { border-bottom:0; }
     <h1 id="title">Who talks to whom</h1>
     <p class="sub" id="subtitle"></p>
   </div>
-  <button class="ghost" id="theme">Dark mode</button>
+  <!-- Label is filled in by the theme script; "Theme" avoids flashing a stale
+       state on the way there. -->
+  <button class="ghost" id="theme">Theme</button>
 </header>
 
 <div class="albums">
@@ -1366,17 +1411,51 @@ $('#foot').innerHTML =
   `The mention grid maps ${fmt(D.totals.mentionsMapped)} of ${fmt(D.totals.mentionsTotal)} tags to regular chat members. ` +
   `Unknown handles, news accounts, and bots are not assigned to a person.`;
 
-/* ---------- theme ---------- */
-if (qs.get('theme') === 'dark') {
-  document.documentElement.dataset.theme = 'dark';
-  $('#theme').textContent = 'Light mode';
 }
-$('#theme').addEventListener('click', () => {
-  const dark = document.documentElement.dataset.theme === 'dark';
-  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
-  $('#theme').textContent = dark ? 'Dark mode' : 'Light mode';
-});
-}
+</script>
+<script>
+/* The theme control sits outside boot() on purpose: it has to work even when
+   the dataset fails to load, which is exactly when boot() never runs.
+   window.THEME was set up by the inline script in <head>. */
+(function () {
+  var LABEL = { system: 'Theme: system', light: 'Theme: light', dark: 'Theme: dark' };
+  var HINT = {
+    system: 'Following your system setting. Click for light.',
+    light: 'Light. Click for dark.',
+    dark: 'Dark. Click to follow your system setting.',
+  };
+  var btn = document.querySelector('#theme');
+
+  /* Chat and album tabs are links that reload the page, and viewHref copies
+     whatever is in the URL. Keeping ?theme in sync means those links carry the
+     choice; localStorage already covers a plain reload or a fresh visit.
+     'system' is the default, so it stays out of the URL. */
+  var syncUrl = function (pref) {
+    var url = new URL(location.href);
+    if (pref === 'system') url.searchParams.delete('theme');
+    else url.searchParams.set('theme', pref);
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+  };
+
+  var render = function () {
+    var pref = window.THEME.get();
+    btn.textContent = LABEL[pref];
+    btn.title = HINT[pref];
+    btn.setAttribute('aria-label', HINT[pref]);
+  };
+
+  btn.addEventListener('click', function () {
+    var order = window.THEME.order;
+    var next = order[(order.indexOf(window.THEME.get()) + 1) % order.length];
+    window.THEME.set(next);
+    syncUrl(next);
+    render();
+  });
+
+  // A ?theme= link, or a stored choice, should be reflected in the URL too.
+  syncUrl(window.THEME.get());
+  render();
+})();
 </script>
 </body>
 </html>
