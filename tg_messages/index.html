@@ -69,11 +69,31 @@ button:focus-visible, summary:focus-visible { outline:3px solid var(--s1); outli
 /* controls */
 .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; }
 .seg { display:inline-flex; background:var(--surface); border:1px solid var(--ring); border-radius:9px; padding:2px; }
-.seg button {
+.seg button, .seg a {
   border:0; background:transparent; color:var(--ink2); font:inherit; font-size:13px;
-  padding:5px 11px; border-radius:7px; cursor:pointer;
+  padding:5px 11px; border-radius:7px; cursor:pointer; text-decoration:none;
 }
-.seg button[aria-pressed="true"] { background:var(--s1); color:#fff; }
+.seg button[aria-pressed="true"], .seg a[aria-pressed="true"] { background:var(--s1); color:#fff; }
+
+/* group picker */
+.picker { margin-bottom:18px; }
+.picker-head { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin-bottom:12px; }
+.picker-head .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; }
+.picker-count { font-size:13px; color:var(--ink2); margin-left:auto; }
+.chips { display:flex; flex-wrap:wrap; gap:7px; }
+.chip {
+  border:1px solid var(--ring); background:var(--surface); color:var(--ink2);
+  font:inherit; font-size:13px; padding:5px 11px; border-radius:999px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.chip:hover { border-color:var(--s1); color:var(--ink); }
+.chip[aria-pressed="true"] { background:var(--s1); border-color:var(--s1); color:#fff; }
+.chip .n { font-size:11px; opacity:.62; font-variant-numeric:tabular-nums; }
+
+/* album grouping */
+.albums { display:flex; flex-wrap:wrap; align-items:center; gap:10px 14px; margin:0 0 22px; }
+.albums .lbl { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; }
+.albums .note { margin:0; flex:1 1 40ch; font-size:13px; }
 
 /* matrix */
 .mwrap { overflow-x:auto; }
@@ -172,17 +192,7 @@ table.data tr:last-child td { border-bottom:0; }
 }
 .emoji { font-size:15px; }
 
-/* claim section */
-.verdict { border-radius:12px; padding:18px 20px; border:1px solid var(--ring); background:var(--surface); }
-.verdict .tagline { font-size:19px; font-weight:600; letter-spacing:-0.01em; margin:0 0 8px; }
-.verdict p { margin:0 0 8px; color:var(--ink2); max-width:80ch; }
-.verdict p:last-child { margin-bottom:0; }
-.verdict .badge { display:inline-block; font-size:11px; text-transform:uppercase;
-  letter-spacing:0.05em; font-weight:600; padding:3px 9px; border-radius:20px;
-  margin-bottom:10px; }
-.badge.no  { background:#e9a09f; color:#0b0b0b; }
-.badge.part{ background:#fab219; color:#0b0b0b; }
-.badge.yes { background:#0ca30c; color:#fff; }
+/* group section */
 .grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:18px; margin-top:18px; }
 .dist { position:relative; height:96px; margin-top:16px; }
 .dist .col { position:absolute; bottom:20px; width:4px; background:var(--seq2); border-radius:2px 2px 0 0; }
@@ -216,7 +226,24 @@ table.data tr:last-child td { border-bottom:0; }
   <button class="ghost" id="theme">Dark mode</button>
 </header>
 
+<div class="albums">
+  <span class="lbl">Photo albums</span>
+  <div class="seg" id="albumSeg" role="group" aria-label="How to count photo albums"></div>
+  <p class="note" id="albumNote"></p>
+</div>
+
 <div class="tiles" id="tiles"></div>
+
+<!-- ============ PEOPLE ============ -->
+<section>
+  <h2>People</h2>
+  <p class="note">
+    A person-by-person view. "Replies sent" shows how often they answer someone. "Replies
+    received" shows how often other people answer them. "Typical response" is their usual
+    reply time.
+  </p>
+  <div class="card" style="overflow-x:auto"><div id="people"></div></div>
+</section>
 
 <!-- ============ MATRIX ============ -->
 <section>
@@ -261,17 +288,6 @@ table.data tr:last-child td { border-bottom:0; }
   </div>
 </section>
 
-<!-- ============ PEOPLE ============ -->
-<section>
-  <h2>People</h2>
-  <p class="note">
-    A person-by-person view. "Replies sent" shows how often they answer someone. "Replies
-    received" shows how often other people answer them. "Typical response" is their usual
-    reply time.
-  </p>
-  <div class="card" style="overflow-x:auto"><div id="people"></div></div>
-</section>
-
 <!-- ============ REACTIONS ============ -->
 <section>
   <h2>Reactions</h2>
@@ -309,14 +325,23 @@ table.data tr:last-child td { border-bottom:0; }
   </div>
 </section>
 
-<!-- ============ CLIQUE CLAIM ============ -->
+<!-- ============ GROUP TIGHTNESS ============ -->
 <section id="claim">
-  <h2>Do these four mostly interact among themselves?</h2>
+  <h2>Does a group mostly interact among themselves?</h2>
   <p class="note">
-    The four people are <b id="claimNames"></b>. Three of them post a lot, so large interaction
-    counts alone prove very little. The comparison below adjusts for that. A score of 1.00x
-    is normal for the amount they post. Switch between replies, reactions, and tags below.
+    Pick any set of people below. Heavy posters rack up large interaction counts with
+    everybody, so raw totals prove very little; everything here is measured against how much
+    each person posts. A score of 1.00x is exactly normal for their volume.
+    Switch between replies, reactions, and tags in the breakdown.
   </p>
+  <div class="card picker">
+    <div class="picker-head">
+      <span class="lbl">Group</span>
+      <div class="seg" id="groupPresets"></div>
+      <span class="picker-count" id="groupCount"></span>
+    </div>
+    <div class="chips" id="groupPicker"></div>
+  </div>
   <div id="verdict"></div>
   <details class="more" open>
     <summary>See the detailed breakdown</summary>
@@ -338,39 +363,88 @@ table.data tr:last-child td { border-bottom:0; }
 </main>
 
 <div id="tip"></div>
-<script src="data.js"></script>
-<script src="clique.js"></script>
-<script src="data2.js"></script>
-<script src="clique2.js"></script>
+<script src="build/manifest.js"></script>
 <script>
+/* Only the selected chat and album window are fetched, so adding windows costs
+   nothing at page load. Every variant file assigns to the same global. */
 const pageParams = new URLSearchParams(location.search);
-const chatSets = [
-  { key: 'recent', data: window.DATA, clique: window.CLIQUE },
-  { key: 'history', data: window.DATA2, clique: window.CLIQUE2 },
-];
+const chatSets = window.MANIFEST.chats;
 const activeChat = chatSets.find(chat => chat.key === pageParams.get('chat')) || chatSets[0];
-const D = activeChat.data, P = D.people, N = P.length;
+const albumWindows = window.MANIFEST.windows;
+// Number(null) is 0, a valid window, so an absent param has to be caught first
+const askedWindow = pageParams.has('albums') ? Number(pageParams.get('albums')) : NaN;
+const ALBUM_ON = window.MANIFEST.default;  // what "count albums as one message" picks
+const albumWindow = albumWindows.includes(askedWindow) ? askedWindow : ALBUM_ON;
+
+const loadScript = src => new Promise((ok, fail) => {
+  const s = document.createElement('script');
+  s.src = src;
+  s.onload = ok;
+  s.onerror = () => fail(new Error(`could not load ${src} — run: python3 build.py`));
+  document.head.append(s);
+});
+
+loadScript(`build/data-${activeChat.key}-a${albumWindow}.js`)
+  .then(() => boot())   // boot lives in the next script block, so resolve it late
+  .catch(err => {
+    document.querySelector('#title').textContent = 'Data not built yet';
+    document.querySelector('#subtitle').textContent = err.message;
+  });
+</script>
+<script>
+function boot() {
+const D = window.DATA, P = D.people, N = P.length;
 const $ = s => document.querySelector(s);
 const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h != null) e.innerHTML = h; return e; };
 const fmt = n => n.toLocaleString('en-US');
 const pct = x => (x * 100).toFixed(0) + '%';
 const short = s => s.length > 16 ? s.slice(0, 15) + '…' : s;
-const ordinal = n => {
-  const t = n % 100;
-  if (t >= 11 && t <= 13) return n + 'th';
-  return n + ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+
+// links rather than buttons: each view stays shareable, and switching reloads
+// the one dataset file that view needs
+const viewHref = over => {
+  const url = new URL(location.href);
+  url.searchParams.set('chat', activeChat.key);
+  url.searchParams.set('albums', albumWindow);
+  Object.entries(over).forEach(([k, v]) => url.searchParams.set(k, v));
+  url.hash = '';
+  return url.pathname + url.search;
 };
 
 chatSets.forEach(chat => {
-  const url = new URL(location.href);
-  url.searchParams.set('chat', chat.key);
-  url.hash = '';
   const link = el('a', 'chat-tab');
-  link.href = url.pathname + url.search;
-  link.textContent = chat.data.chat;
+  link.href = viewHref({ chat: chat.key });
+  link.textContent = chat.label;
   if (chat === activeChat) link.setAttribute('aria-current', 'page');
   $('#chatTabs').append(link);
 });
+
+/* ---------- album grouping control ---------- */
+(function () {
+  const seg = $('#albumSeg');
+  // Album parts land in the same second, and widening the window past that
+  // barely moves the count — so the choice is on/off, not a window picker.
+  // ?albums=2|3 still loads if anyone wants to check that for themselves.
+  const choices = [[0, 'Count every photo'], [albumWindow || ALBUM_ON, 'Count albums as one message']];
+  choices.forEach(([w, text]) => {
+    const a = el('a', null, text);
+    a.href = viewHref({ albums: w });
+    a.setAttribute('aria-pressed', (w > 0) === (albumWindow > 0));
+    seg.append(a);
+  });
+
+  const stats = activeChat.albums[String(albumWindow)];
+  const merged = stats ? stats.messagesMerged : 0;
+  $('#albumNote').innerHTML = albumWindow === 0
+    ? `Telegram splits an album into one message per photo, and the export keeps it that way — ` +
+      `so a post of ten photos reads as ten messages. ` +
+      `<b>${fmt(D.totals.messages)} messages</b> counted.`
+    : `Photos from the same person landing within ${albumWindow} second${albumWindow > 1 ? 's' : ''} ` +
+      `are treated as one post. That folds <b>${fmt(merged)} messages</b> into ` +
+      `<b>${fmt(stats.albumsFound)} albums</b> — ${pct(merged / stats.rawMessages)} of the export — ` +
+      `leaving <b>${fmt(D.totals.messages)} messages</b>. ` +
+      `Replies and reactions are unchanged; they follow the album to its first photo.`;
+})();
 
 function dur(s) {
   if (s == null) return 'Not available';
@@ -670,12 +744,273 @@ function hist(target, data, labelFn, capLabel) {
 hist('#sizeHist', D.threadSizeHist, k => k >= 20 ? '20+' : k + ' msgs');
 hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level' : k + ' levels'));
 
-/* ---------- claim check ---------- */
+/* ---------- group tightness ---------- */
 (function () {
-  const C = activeChat.clique;
-  $('#claimNames').textContent = C.group.join(', ') + '. ゴードン is @redacted7';
+  const LAYER_M = { reply: D.reply, react: D.react, mention: D.mention };
+  const msgs = D.msgCount;
+  const totalMsgs = msgs.reduce((a, b) => a + b, 0);
+  const everyone = [...Array(N).keys()];
+  const RANK_LIMIT = 150000;  // enumerate every group up to here, sample past it
+  const SAMPLES = 30000;
   let cl = 'reply';
 
+  /* ---- the model ----------------------------------------------------
+     Expected traffic from i to j if people interacted in proportion to how
+     much everyone posts:
+       E[i][j] = (interactions i sent) x (messages j posted) / (all msgs - i's)
+     Self-interaction is excluded everywhere, so a group's score only reflects
+     traffic between different people. Cohesion = observed / expected. */
+  function layer(name) {
+    const M = LAYER_M[name];
+    const out = M.map((row, i) => row.reduce((s, v, j) => j === i ? s : s + v, 0));
+    const E = (i, j) => i === j ? 0 : out[i] * msgs[j] / (totalMsgs - msgs[i]);
+    return { M, out, E };
+  }
+
+  function score(L, members) {
+    let obs = 0, exp = 0;
+    for (const i of members) for (const j of members) {
+      if (i !== j) { obs += L.M[i][j]; exp += L.E(i, j); }
+    }
+    return { obs, exp, coh: exp > 0 ? obs / exp : null };
+  }
+
+  // Under the null, sender i keeps their own out-degree and each interaction
+  // lands inside the group with probability p_i. A sum of binomials, so the
+  // mean and sd are closed-form — no need to shuffle the chat 20,000 times.
+  function nullMoments(L, members) {
+    let mu = 0, varr = 0, inside = 0;
+    for (const j of members) inside += msgs[j];
+    for (const i of members) {
+      if (!L.out[i]) continue;
+      const p = (inside - msgs[i]) / (totalMsgs - msgs[i]);
+      mu += L.out[i] * p;
+      varr += L.out[i] * p * (1 - p);
+    }
+    return { mu, sd: Math.sqrt(varr) };
+  }
+
+  // Abramowitz & Stegun 7.1.26 — plenty accurate for a displayed p-value
+  function erfc(x) {
+    const z = Math.abs(x), t = 1 / (1 + z / 2);
+    const y = t * Math.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 +
+      t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * (-1.13520398 +
+      t * (1.48851587 + t * (-0.82215223 + t * 0.17087277)))))))));
+    return x >= 0 ? y : 2 - y;
+  }
+  const tailP = z => z == null ? null : Math.max(1e-12, 0.5 * erfc(z / Math.SQRT2));
+
+  function assess(L, members) {
+    const s = score(L, members);
+    const { mu, sd } = nullMoments(L, members);
+    const z = sd ? (s.obs - mu) / sd : null;
+    return { ...s, mu, sd, z, p: tailP(z) };
+  }
+
+  /* ---- comparing against every other group of the same size ---------- */
+  function binom(n, k) {
+    if (k < 0 || k > n) return 0;
+    let r = 1;
+    for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1);
+    return Math.round(r);
+  }
+
+  function eachCombo(n, k, fn) {
+    const c = Array.from({ length: k }, (_, i) => i);
+    for (;;) {
+      fn(c);
+      let i = k - 1;
+      while (i >= 0 && c[i] === n - k + i) i--;
+      if (i < 0) return;
+      c[i]++;
+      for (let j = i + 1; j < k; j++) c[j] = c[j - 1] + 1;
+    }
+  }
+
+  function randomCombo(pool, k, buf) {  // partial Fisher-Yates, pool is reused
+    for (let i = 0; i < k; i++) {
+      const r = i + Math.floor(Math.random() * (pool.length - i));
+      [pool[i], pool[r]] = [pool[r], pool[i]];
+      buf[i] = pool[i];
+    }
+    return buf;
+  }
+
+  // Ratio alone favours low-volume groups whose scores swing on a handful of
+  // interactions, so the "tighter groups" list ranks by z instead.
+  function survey(L, members) {
+    const k = members.length;
+    const total = binom(N, k);
+    const mine = score(L, members).coh;
+    const exact = total <= RANK_LIMIT;
+    const cohs = [];
+    const best = [];
+    let better = 0;
+
+    const consider = combo => {
+      const s = score(L, combo);
+      if (s.coh == null) return;
+      cohs.push(s.coh);
+      if (s.coh > mine) better++;
+      const { mu, sd } = nullMoments(L, combo);
+      const rec = { members: combo.slice(), coh: s.coh, obs: s.obs, z: sd ? (s.obs - mu) / sd : 0 };
+      if (best.length < 8) { best.push(rec); best.sort((a, b) => b.z - a.z); }
+      else if (rec.z > best[7].z) { best[7] = rec; best.sort((a, b) => b.z - a.z); }
+    };
+
+    if (exact) {
+      eachCombo(N, k, consider);
+    } else {
+      const pool = everyone.slice(), buf = new Array(k);
+      for (let t = 0; t < SAMPLES; t++) consider(randomCombo(pool, k, buf));
+    }
+    cohs.sort((a, b) => a - b);
+    return { exact, total, seen: cohs.length, rank: better + 1, cohs, best };
+  }
+
+  function tightest(L, k) {
+    let win = null;
+    const look = combo => {
+      const s = score(L, combo);
+      if (s.coh == null) return;
+      const { mu, sd } = nullMoments(L, combo);
+      const z = sd ? (s.obs - mu) / sd : 0;
+      if (!win || z > win.z) win = { members: combo.slice(), z };
+    };
+    if (binom(N, k) <= RANK_LIMIT) eachCombo(N, k, look);
+    else {
+      const pool = everyone.slice(), buf = new Array(k);
+      for (let t = 0; t < SAMPLES; t++) look(randomCombo(pool, k, buf));
+    }
+    return win ? win.members : null;
+  }
+
+  /* ---- per-group breakdowns ------------------------------------------ */
+  const outsideOf = members => everyone.filter(i => !members.includes(i));
+
+  function memberRows(L) {
+    const rest = outsideOf(sel);
+    return sel.map(i => {
+      let toG = 0, eG = 0, toR = 0, eR = 0;
+      for (const j of sel) if (j !== i) { toG += L.M[i][j]; eG += L.E(i, j); }
+      for (const j of rest) { toR += L.M[i][j]; eR += L.E(i, j); }
+      const tot = toG + toR;
+      return {
+        name: P[i], messages: msgs[i],
+        toGroup: toG, toGroupExp: eG, toGroupLift: eG ? toG / eG : null,
+        toRest: toR, toRestExp: eR, toRestLift: eR ? toR / eR : null,
+        shareInternal: tot ? toG / tot : 0, shareInternalExp: tot ? eG / tot : 0,
+      };
+    });
+  }
+
+  function outsiderRows(L) {
+    return outsideOf(sel).map(j => {
+      let from = 0, fromE = 0, to = 0, toE = 0;
+      for (const i of sel) { from += L.M[i][j]; fromE += L.E(i, j); to += L.M[j][i]; toE += L.E(j, i); }
+      return {
+        name: P[j], messages: msgs[j],
+        fromGroup: from, fromGroupExp: fromE, fromGroupLift: fromE ? from / fromE : null,
+        toGroup: to, toGroupExp: toE, toGroupLift: toE ? to / toE : null,
+      };
+    }).sort((a, b) => (a.fromGroupLift ?? 0) - (b.fromGroupLift ?? 0));
+  }
+
+  function pairRows(L) {
+    const rows = [];
+    for (let a = 0; a < sel.length; a++) for (let b = a + 1; b < sel.length; b++) {
+      const i = sel[a], j = sel[b];
+      const obs = L.M[i][j] + L.M[j][i], exp = L.E(i, j) + L.E(j, i);
+      rows.push({ a: P[i], b: P[j], obs, exp, lift: exp ? obs / exp : null });
+    }
+    return rows.sort((x, y) => (y.lift ?? 0) - (x.lift ?? 0));
+  }
+
+  // A member whose removal *raises* the score is not part of the cluster.
+  function dropRows(L) {
+    if (sel.length < 3) return [];
+    return sel.map(drop => {
+      const kept = sel.filter(i => i !== drop);
+      const s = score(L, kept);
+      return { without: P[drop], members: kept.map(i => P[i]), ...s };
+    }).sort((a, b) => (b.coh ?? 0) - (a.coh ?? 0));
+  }
+
+  function swapRows(L, mine) {
+    if (sel.length < 3) return [];
+    const rest = outsideOf(sel);
+    return sel.map(drop => {
+      const kept = sel.filter(i => i !== drop);
+      let best = null, beats = 0;
+      rest.forEach(add => {
+        const s = score(L, [...kept, add]);
+        if (s.coh == null) return;
+        if (s.coh > mine) beats++;
+        if (!best || s.coh > best.coh) best = { name: P[add], coh: s.coh };
+      });
+      return { member: P[drop], best, beats, options: rest.length };
+    });
+  }
+
+  /* ---- selection state ----------------------------------------------- */
+  // D.profile is ordered by message count, so the first k indices are the top posters
+  const topPosters = k => everyone.slice(0, Math.min(k, N));
+
+  function initialSelection() {
+    const asked = (qs.get('group') || '').split(',')
+      .map(Number).filter(i => Number.isInteger(i) && i >= 0 && i < N);
+    if (asked.length >= 2) return [...new Set(asked)].sort((a, b) => a - b);
+    return topPosters(4);
+  }
+  let sel = initialSelection();
+
+  const sameSet = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+
+  function setSelection(next) {
+    sel = [...new Set(next)].sort((a, b) => a - b);
+    const u = new URL(location.href);
+    u.searchParams.set('group', sel.join(','));
+    history.replaceState(null, '', u.pathname + u.search);
+    drawPicker();
+    drawPresets();
+    renderAll();
+  }
+
+  /* ---- picker --------------------------------------------------------- */
+  function drawPicker() {
+    const box = $('#groupPicker');
+    box.replaceChildren();
+    everyone.forEach(i => {
+      const chip = el('button', 'chip', `${P[i]}<span class="n">${fmt(msgs[i])}</span>`);
+      chip.type = 'button';
+      chip.setAttribute('aria-pressed', sel.includes(i));
+      chip.addEventListener('click', () =>
+        setSelection(sel.includes(i) ? sel.filter(x => x !== i) : [...sel, i]));
+      box.append(chip);
+    });
+    $('#groupCount').textContent = sel.length < 2
+      ? 'Pick at least two people'
+      : `${sel.length} of ${N} people selected`;
+  }
+
+  function drawPresets() {
+    const seg = $('#groupPresets');
+    seg.replaceChildren();
+    const opts = [
+      ['Top 4 posters', () => topPosters(4)],
+      ['Tightest 4', () => tightest(layer(cl), 4) || topPosters(4)],
+    ];
+    opts.forEach(([text, get]) => {
+      const b = el('button', null, text);
+      b.type = 'button';
+      // only the presets we can evaluate cheaply get a pressed state
+      b.setAttribute('aria-pressed', text !== 'Tightest 4' && sameSet(sel, get()));
+      b.addEventListener('click', () => setSelection(get()));
+      seg.append(b);
+    });
+  }
+
+  /* ---- drawing -------------------------------------------------------- */
   // lift bar: 1.0x sits at centre, left = less than expected, right = more
   function liftBar(v, cap = 2) {
     if (v == null) return '<div class="liftbar"></div>';
@@ -697,52 +1032,53 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     return `<div class="liftbar"><i style="${side};background:${col}"></i><b style="${tx}">${lab}</b></div>`;
   }
 
-  function clusterOverview() {
-    const L = C.layers.reply;
+  function clusterOverview(L, members) {
     const card = el('div', 'card cluster-card');
     card.append(el('h3', null, 'The group at a glance'));
     card.append(el('p', 'note',
-      'Blue lines connect the four people. Thicker lines mean a stronger reply habit. ' +
+      'Blue lines connect the selected people. Thicker lines mean a stronger reply habit. ' +
       'Orange lines lead to everyone else. The bars show the exact split.'));
 
     const overview = el('div', 'cluster-overview');
     const map = el('div', 'cluster-map');
     map.setAttribute('role', 'img');
     map.setAttribute('aria-label',
-      'A map of reply connections among the four named people and the rest of the chat. ' +
+      'A map of reply connections among the selected people and the rest of the chat. ' +
       'Line thickness shows how often each connection happens compared with normal.');
 
-    const points = [
-      { x: 19, y: 27 }, { x: 54, y: 27 },
-      { x: 19, y: 73 }, { x: 54, y: 73 },
-    ];
-    const byName = new Map(C.group.map((name, i) => [name, points[i]]));
-    const rest = { x: 87, y: 50 };
+    const k = sel.length;
+    const pts = sel.map((_, i) => {
+      const a = -Math.PI / 2 + i * 2 * Math.PI / k;
+      return { x: 37 + Math.cos(a) * (k === 2 ? 0 : 25), y: 50 + Math.sin(a) * 33 };
+    });
+    const byName = new Map(sel.map((idx, i) => [P[idx], pts[i]]));
+    const rest = { x: 88, y: 50 };
     const lines = [];
 
-    L.pairs.forEach(p => {
+    pairRows(L).forEach(p => {
       const a = byName.get(p.a), b = byName.get(p.b);
-      const width = Math.max(1.5, Math.min(7, 1.5 + p.lift * 2));
-      const opacity = Math.max(.18, Math.min(.9, p.lift / 2));
+      const lift = p.lift ?? 0;
+      const width = Math.max(1.5, Math.min(7, 1.5 + lift * 2));
+      const opacity = Math.max(.18, Math.min(.9, lift / 2));
       lines.push(`<line class="cluster-line inside" x1="${a.x}%" y1="${a.y}%" ` +
         `x2="${b.x}%" y2="${b.y}%" stroke-width="${width}" opacity="${opacity}">` +
-        `<title>${p.a} and ${p.b}: ${p.lift.toFixed(2)}x normal</title></line>`);
+        `<title>${p.a} and ${p.b}: ${lift.toFixed(2)}x normal</title></line>`);
     });
-    C.group.forEach(name => {
-      const m = L.members.find(person => person.name === name);
-      const a = byName.get(name);
-      const width = Math.max(1.5, Math.min(6, 1.5 + m.toRestLift * 2));
+    members.forEach(m => {
+      const a = byName.get(m.name);
+      const lift = m.toRestLift ?? 0;
+      const width = Math.max(1.5, Math.min(6, 1.5 + lift * 2));
       lines.push(`<line class="cluster-line outside" x1="${a.x}%" y1="${a.y}%" ` +
         `x2="${rest.x}%" y2="${rest.y}%" stroke-width="${width}">` +
-        `<title>${name} to the rest of the chat: ${m.toRestLift.toFixed(2)}x normal</title></line>`);
+        `<title>${m.name} to the rest of the chat: ${lift.toFixed(2)}x normal</title></line>`);
     });
 
     map.innerHTML = `<div class="cluster-boundary"></div>` +
-      `<div class="cluster-label">the four in the claim</div>` +
+      `<div class="cluster-label">the selected group</div>` +
       `<svg aria-hidden="true">${lines.join('')}</svg>`;
-    C.group.forEach(name => {
-      const p = byName.get(name);
-      const node = el('div', 'cluster-node', name);
+    members.forEach(m => {
+      const p = byName.get(m.name);
+      const node = el('div', 'cluster-node', short(m.name));
       node.style.left = p.x + '%'; node.style.top = p.y + '%';
       map.append(node);
     });
@@ -751,15 +1087,14 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     map.append(restNode);
 
     const splits = el('div', 'split-list');
-    C.group.forEach(name => {
-      const m = L.members.find(person => person.name === name);
+    members.forEach(m => {
       const inside = Math.round(m.shareInternal * 100);
       const row = el('div', 'split-row');
       row.append(el('div', 'split-head',
-        `<b>${name}</b><span>${inside}% group · ${100 - inside}% everyone else</span>`));
+        `<b>${m.name}</b><span>${inside}% group · ${100 - inside}% everyone else</span>`));
       const bar = el('div', 'split-bar');
       bar.setAttribute('role', 'img');
-      bar.setAttribute('aria-label', `${name} sends ${inside}% of replies to the group and ${100 - inside}% to everyone else.`);
+      bar.setAttribute('aria-label', `${m.name} sends ${inside}% of replies to the group and ${100 - inside}% to everyone else.`);
       bar.append(el('i', 'inside'), el('i', 'outside'));
       bar.children[0].style.width = inside + '%';
       bar.children[1].style.width = (100 - inside) + '%';
@@ -769,60 +1104,38 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
       '<span class="key"><i style="background:var(--s1)"></i> inside the group</span>' +
       '<span class="key"><i style="background:var(--s2)"></i> everyone else</span>'));
 
-    overview.append(map, splits);
+    // the map only reads clearly up to a handful of nodes
+    if (k <= 8) overview.append(map, splits);
+    else overview.append(splits);
     card.append(overview);
     return card;
   }
 
-  function verdict() {
-    const box = el('div', 'verdict');
-    const reply = C.layers.reply, react = C.layers.react, mention = C.layers.mention;
-    const trio = reply.trios[0];                       // the trio that scores highest
-    const weakest = reply.swaps.reduce((a, b) => a.beats > b.beats ? a : b);
-    const inward = [...reply.members].sort((a, b) => b.shareInternal - a.shareInternal);
-    const most = inward[0];
-    box.innerHTML =
-      `<span class="badge part">Close, but the group is wrong</span>` +
-      `<p class="tagline">Three of them form a group. The fourth weakens it.</p>` +
-
-      `<p>The four exchange ${fmt(reply.obs)} replies. Based on how much they post, about
-       ${fmt(reply.exp)} would be normal. Their actual total is ${reply.cohesion.toFixed(2)}x
-       normal, so there is a real connection here.</p>` +
-
-      `<p>They are not the closest group of four, though. They rank ${ordinal(reply.rank)} out
-       of ${fmt(reply.totalCombos)} possible groups. ${reply.rank - 1} other groups keep more of
-       their replies among themselves.</p>` +
-
-      `<p><b>${weakest.member} is the weak link.</b> Remove ${weakest.member}, and the score
-       rises from ${reply.cohesion.toFixed(2)}x to ${trio.coh.toFixed(2)}x. The clearer group is
-       ${trio.members.join(', ')}. Its strongest connection is between ${reply.pairs[0].a} and
-       ${reply.pairs[0].b}.</p>` +
-
-      `<p>Even ${most.name}, the person most focused on this group, sends
-       ${pct(1 - most.shareInternal)} of their replies to other people. ` +
-      (react.cohesion >= 1.1
-        ? `Reactions point the same way. The four get a ${react.cohesion.toFixed(2)}x score there, above normal.</p>`
-        : `Reactions do not show a group. The four get a ${react.cohesion.toFixed(2)}x score there, close to normal.</p>`) +
-
-      (mention.cohesion >= 1.1
-        ? `<p>Tags add another signal. The four mention each other at ${mention.cohesion.toFixed(2)}x the normal rate.</p>`
-        : `<p>Tags do not add much. The four mention each other at ${mention.cohesion.toFixed(2)}x the normal rate.</p>`);
-    return box;
-  }
 
   function render() {
-    const L = C.layers[cl];
+    const L = layer(cl);
+    const A = assess(L, sel);
     const interaction = cl === 'reply' ? 'replies' : cl === 'react' ? 'reactions' : 'mentions';
     const interactionVerb = cl === 'reply' ? 'reply to' : cl === 'react' ? 'react to' : 'mention';
     const body = $('#claimBody');
     body.replaceChildren();
+    if (A.coh == null) {
+      body.append(el('p', 'note', `These people exchange too few ${interaction} to score.`));
+      return;
+    }
+    const sv = survey(L, sel);
+    const members = memberRows(L);
 
     // headline numbers
     const tiles = el('div', 'tiles');
-    [[L.cohesion.toFixed(2) + 'x', 'Compared with normal', `${fmt(L.obs)} actual, ${fmt(L.exp)} normal`],
-     [`#${L.rank}`, `of ${fmt(L.totalCombos)} groups`, `ranked by how much they ${interactionVerb} one another`],
-     [L.null.z > 3 ? 'Very unlikely' : 'Nothing unusual', 'Random chance?', `Compared with ${fmt(L.null.trials)} shuffled chats`],
-     [pct(C.groupMsgShare), 'Share of all messages', `sent by these four`],
+    [[A.coh.toFixed(2) + 'x', 'Compared with normal', `${fmt(A.obs)} actual, ${fmt(Math.round(A.exp))} normal`],
+     [sv.exact ? `#${fmt(sv.rank)}` : pct(1 - (sv.rank - 1) / sv.seen),
+      sv.exact ? `of ${fmt(sv.total)} groups` : `of ${fmt(sv.seen)} sampled groups`,
+      `ranked by how much they ${interactionVerb} one another`],
+     [A.z == null ? '—' : A.z >= 3 ? 'Very unlikely' : 'Nothing unusual', 'Random chance?',
+      A.z == null ? 'not enough traffic' : `z = ${A.z.toFixed(1)}, p ${A.p < 0.0001 ? '< 0.0001' : '= ' + A.p.toFixed(4)}`],
+     [pct(sel.reduce((t, i) => t + msgs[i], 0) / totalMsgs), 'Share of all messages',
+      `sent by these ${sel.length}`],
     ].forEach(([v, k, h]) => {
       const t = el('div', 'tile');
       t.append(el('div', 'v', v), el('div', 'k', k), el('div', 'h', h));
@@ -830,26 +1143,28 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     });
     body.append(tiles);
 
-    // distribution of all possible groups of four
+    // distribution of every group of this size
     const dist = el('div', 'card');
     dist.style.marginTop = '18px';
     dist.append(el('h2', null, 'How this group compares'));
     dist.append(el('p', 'note',
-      `Each bar represents a group of four. Groups farther to the right ${interactionVerb} one another ` +
-      `more often. The orange bar is the group in question.`));
-    const vals = L.allCohesion, lo = vals[0], hi = vals[vals.length - 1];
+      `Each bar is a group of ${sel.length}${sv.exact ? '' : ', drawn at random'}. Groups farther to the ` +
+      `right ${interactionVerb} one another more often. The orange bar is the current selection.`));
+    const vals = sv.cohs, lo = vals[0], hi = vals[vals.length - 1];
     const BINS = 46, bins = new Array(BINS).fill(0);
-    vals.forEach(v => bins[Math.min(BINS - 1, Math.floor((v - lo) / (hi - lo) * BINS))]++);
-    const meBin = Math.min(BINS - 1, Math.floor((L.cohesion - lo) / (hi - lo) * BINS));
+    const at = v => Math.max(0, Math.min(BINS - 1, Math.floor((v - lo) / (hi - lo) * BINS)));
+    vals.forEach(v => bins[at(v)]++);
+    const meBin = at(A.coh);
     const bmax = Math.max(...bins);
     const plot = el('div', 'dist');
     bins.forEach((b, i) => {
       const c = el('div', 'col' + (i === meBin ? ' me' : ''));
       c.style.cssText += `left:${i / BINS * 100}%;height:${Math.max(2, b / bmax * 72)}px`;
-      c.title = `${b} groups`;
+      c.title = `${fmt(b)} groups`;
       plot.append(c);
     });
     [lo, 1, hi].forEach(v => {
+      if (v < lo || v > hi) return;
       const x = (v - lo) / (hi - lo) * 100;
       const a = el('div', 'axl', v.toFixed(2) + 'x');
       a.style.left = x + '%';
@@ -860,12 +1175,12 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
         plot.append(m);
       }
     });
-    const tag = el('div', 'mtag', `these four, ${L.cohesion.toFixed(2)}x`);
+    const tag = el('div', 'mtag', `this group, ${A.coh.toFixed(2)}x`);
     tag.style.cssText += `left:${Math.min(72, meBin / BINS * 100)}%;top:0`;
     plot.append(tag);
     dist.append(plot);
     dist.append(el('div', 'legend',
-      `<span class="key"><i style="background:var(--s2)"></i> these four</span>` +
+      `<span class="key"><i style="background:var(--s2)"></i> this group</span>` +
       `<span class="key"><i style="background:var(--seq2)"></i> other groups</span>` +
       `<span class="r">The dashed line marks the normal level.</span>`));
     body.append(dist);
@@ -880,13 +1195,13 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
       `means more activity than normal.`));
     mem.append(el('div', 'hdr2',
       '<span></span><span>to the group</span><span>to everyone else</span>'));
-    L.members.forEach(m => {
+    members.forEach(m => {
       const r = el('div', 'lift');
       r.append(el('div', 'lb', `${m.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(m.messages)} msgs</span>`));
       r.append(el('div', null, liftBar(m.toGroupLift)));
       r.append(el('div', null, liftBar(m.toRestLift)));
-      const html = `<b>${m.name}</b><br>To the group: ${fmt(m.toGroup)}, normal is ${m.toGroupExp}<br>` +
-        `To everyone else: ${fmt(m.toRest)}, normal is ${m.toRestExp}<br>` +
+      const html = `<b>${m.name}</b><br>To the group: ${fmt(m.toGroup)}, normal is ${m.toGroupExp.toFixed(1)}<br>` +
+        `To everyone else: ${fmt(m.toRest)}, normal is ${m.toRestExp.toFixed(1)}<br>` +
         `<span class="r">${pct(m.shareInternal)} stays inside the group. The normal share is ${pct(m.shareInternalExp)}.</span>`;
       r.addEventListener('mousemove', e => showTip(e, html));
       r.addEventListener('mouseleave', hideTip);
@@ -898,39 +1213,44 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     two.style.marginTop = '18px';
 
     // remove one person at a time
-    const drop = el('div', 'card');
-    drop.append(el('h2', null, 'Remove one person'));
-    drop.append(el('p', 'note',
-      'This shows what happens to the score when each person is removed. If the score rises, ' +
-      'the remaining three are a closer group.'));
-    const dt = el('table', 'data');
-    dt.append(el('tr', null, '<th>Remove</th><th>People left</th><th>Score</th><th>Change</th>'));
-    L.trios.forEach(t => {
-      const delta = t.coh - L.cohesion;
-      const tr = el('tr');
-      tr.append(el('td', 'name', t.without),
-        el('td', 'name', `<span style="font-size:12px">${t.members.join(' + ')}</span>`),
-        el('td', null, t.coh.toFixed(2) + 'x'),
-        el('td', null, `<span style="color:${delta > 0 ? 'var(--divhi)' : 'var(--divlo)'}">` +
-          `${delta > 0 ? '+' : ''}${delta.toFixed(2)}</span>`));
-      dt.append(tr);
-    });
-    drop.append(dt);
-    two.append(drop);
+    const drops = dropRows(L);
+    if (drops.length) {
+      const drop = el('div', 'card');
+      drop.append(el('h2', null, 'Remove one person'));
+      drop.append(el('p', 'note',
+        'This shows what happens to the score when each person is removed. If the score rises, ' +
+        'the people left behind are a closer group.'));
+      const dt = el('table', 'data');
+      dt.append(el('tr', null, '<th>Remove</th><th>People left</th><th>Score</th><th>Change</th>'));
+      drops.forEach(t => {
+        const delta = t.coh - A.coh;
+        const tr = el('tr');
+        tr.append(el('td', 'name', t.without),
+          el('td', 'name', `<span style="font-size:12px">${t.members.map(short).join(' + ')}</span>`),
+          el('td', null, t.coh.toFixed(2) + 'x'),
+          el('td', null, `<span style="color:${delta > 0 ? 'var(--divhi)' : 'var(--divlo)'}">` +
+            `${delta > 0 ? '+' : ''}${delta.toFixed(2)}</span>`));
+        dt.append(tr);
+      });
+      drop.append(dt);
+      two.append(drop);
+    }
 
     // internal pairs
+    const pairs = pairRows(L);
     const pr = el('div', 'card');
     pr.append(el('h2', null, 'Pairs inside the group'));
-    pr.append(el('p', 'note', `The group score can hide pairs who rarely exchange ${interaction}.`));
+    pr.append(el('p', 'note', `The group score can hide pairs who rarely exchange ${interaction}.` +
+      (pairs.length > 12 ? ' Showing the 12 strongest.' : '')));
     const ph = el('div', 'hdr2', '<span></span><span>compared with normal</span>');
     ph.style.gridTemplateColumns = '195px 1fr';
     pr.append(ph);
-    L.pairs.forEach(p => {
+    pairs.slice(0, 12).forEach(p => {
       const r = el('div', 'lift');
       r.style.gridTemplateColumns = '195px 1fr';
-      r.append(el('div', 'lb', `${p.a} ↔ ${p.b}`));
+      r.append(el('div', 'lb', `${short(p.a)} ↔ ${short(p.b)}`));
       r.append(el('div', null, liftBar(p.lift)));
-      const html = `<b>${p.a} ↔ ${p.b}</b><br>${fmt(p.obs)} actual. ${p.exp} is normal.`;
+      const html = `<b>${p.a} ↔ ${p.b}</b><br>${fmt(p.obs)} actual. ${p.exp.toFixed(1)} is normal.`;
       r.addEventListener('mousemove', e => showTip(e, html));
       r.addEventListener('mouseleave', hideTip);
       pr.append(r);
@@ -943,50 +1263,97 @@ hist('#depthHist', D.threadDepthHist, k => k >= 12 ? '12+' : (k === 1 ? '1 level
     outs.style.marginTop = '18px';
     outs.append(el('h2', null, 'People outside the group'));
     outs.append(el('p', 'note',
-      `The left side shows what each person gets from the four. The right side shows what they ` +
+      `The left side shows what each person gets from the group. The right side shows what they ` +
       `send back. Bars to the right mean more activity than normal.`));
     outs.append(el('div', 'hdr2',
-      '<span></span><span>gets from the four</span><span>gives to the four</span>'));
-    L.outsiders.forEach(o => {
+      '<span></span><span>gets from the group</span><span>gives to the group</span>'));
+    outsiderRows(L).forEach(o => {
       const r = el('div', 'lift');
       r.append(el('div', 'lb', `${o.name}<br><span style="font-size:11px;color:var(--muted)">${fmt(o.messages)} msgs</span>`));
       r.append(el('div', null, liftBar(o.fromGroupLift)));
       r.append(el('div', null, liftBar(o.toGroupLift)));
-      const html = `<b>${o.name}</b><br>Gets ${fmt(o.fromGroup)}. Normal is ${o.fromGroupExp}.<br>` +
-        `Sends ${fmt(o.toGroup)}. Normal is ${o.toGroupExp}.`;
+      const html = `<b>${o.name}</b><br>Gets ${fmt(o.fromGroup)}. Normal is ${o.fromGroupExp.toFixed(1)}.<br>` +
+        `Sends ${fmt(o.toGroup)}. Normal is ${o.toGroupExp.toFixed(1)}.`;
       r.addEventListener('mousemove', e => showTip(e, html));
       r.addEventListener('mouseleave', hideTip);
       outs.append(r);
     });
-    body.append(outs);
+    if (outsiderRows(L).length) body.append(outs);
 
-    const examples = el('div', 'card');
-    examples.style.marginTop = '18px';
-    examples.append(el('h2', null, 'Two groups that are tighter'));
-    examples.append(el('p', 'note',
-      `These groups score higher than the original four after accounting for how much each ` +
-      `person posts. The original group's score is ${L.cohesion.toFixed(2)}x.`));
-    const et = el('table', 'data');
-    et.append(el('tr', null,
-      `<th>Group</th><th>${interaction[0].toUpperCase() + interaction.slice(1)} among them</th>` +
-      '<th>Compared with normal</th>'));
-    L.topZ.slice(0, 2).forEach(group => {
-      const tr = el('tr');
-      const names = group.members.map(i => C.people[i]).join(', ');
-      tr.append(
-        el('td', 'name', names),
-        el('td', null, fmt(group.obs)),
-        el('td', null, group.coh.toFixed(2) + 'x')
-      );
-      et.append(tr);
-    });
-    examples.append(et);
-    body.append(examples);
+    // swapping a member for an outsider
+    const swaps = swapRows(L, A.coh);
+    if (swaps.length) {
+      const sw = el('div', 'card');
+      sw.style.marginTop = '18px';
+      sw.append(el('h2', null, 'Swap one person out'));
+      sw.append(el('p', 'note',
+        'Replacing each member with the best available outsider. If many outsiders beat the ' +
+        'current score, that member is holding the group together less than the others.'));
+      const st = el('table', 'data');
+      st.append(el('tr', null,
+        '<th>Replace</th><th>Best replacement</th><th>New score</th><th>Outsiders who beat the group</th>'));
+      swaps.forEach(s => {
+        const tr = el('tr');
+        tr.append(el('td', 'name', s.member),
+          el('td', 'name', s.best ? s.best.name : '—'),
+          el('td', null, s.best ? s.best.coh.toFixed(2) + 'x' : '—'),
+          el('td', null, `${s.beats} of ${s.options}`));
+        st.append(tr);
+      });
+      sw.append(st);
+      body.append(sw);
+    }
+
+    // groups of the same size that score higher
+    const better = sv.best.filter(g => !sameSet(g.members, sel)).slice(0, 3);
+    if (better.length) {
+      const examples = el('div', 'card');
+      examples.style.marginTop = '18px';
+      examples.append(el('h2', null, `Tighter groups of ${sel.length}`));
+      examples.append(el('p', 'note',
+        `These score higher once you account for how much each person posts. ` +
+        `The current group scores ${A.coh.toFixed(2)}x.` +
+        (sv.exact ? '' : ' Drawn from the same random sample.')));
+      const et = el('table', 'data');
+      et.append(el('tr', null,
+        `<th>Group</th><th>${interaction[0].toUpperCase() + interaction.slice(1)} among them</th>` +
+        '<th>Compared with normal</th><th></th>'));
+      better.forEach(group => {
+        const tr = el('tr');
+        const pick = el('button', 'ghost', 'Select');
+        pick.type = 'button';
+        pick.style.cssText = 'font-size:12px;padding:3px 9px';
+        pick.addEventListener('click', () => setSelection(group.members));
+        tr.append(
+          el('td', 'name', group.members.map(i => short(P[i])).join(', ')),
+          el('td', null, fmt(group.obs)),
+          el('td', null, group.coh.toFixed(2) + 'x'));
+        const td = el('td');
+        td.append(pick);
+        tr.append(td);
+        et.append(tr);
+      });
+      examples.append(et);
+      body.append(examples);
+    }
   }
 
-  $('#verdict').append(verdict(), clusterOverview());
+  function renderAll() {
+    const box = $('#verdict');
+    box.replaceChildren();
+    if (sel.length < 2) {
+      box.append(el('p', 'note', 'Select at least two people to score a group.'));
+      $('#claimBody').replaceChildren();
+      return;
+    }
+    box.append(clusterOverview(layer('reply'), memberRows(layer('reply'))));
+    render();
+  }
+
+  drawPicker();
+  drawPresets();
   wireSeg('#cLayer', v => { cl = v; render(); });
-  render();
+  renderAll();
 })();
 
 /* ---------- footnote ---------- */
@@ -1009,6 +1376,7 @@ $('#theme').addEventListener('click', () => {
   document.documentElement.dataset.theme = dark ? 'light' : 'dark';
   $('#theme').textContent = dark ? 'Dark mode' : 'Light mode';
 });
+}
 </script>
 </body>
 </html>
