@@ -1,0 +1,13 @@
+# Raw Telegram exports: private message contents, and result1.json is 178MB,
+# well past GitHub's 100MB file limit. Never commit these.
+result.json
+result1.json
+result*.json
+
+# build/*.js IS the deployed dashboard data, so it stays tracked. The .json
+# twins are only build-time intermediates that build.py reads for the manifest.
+build/*.json
+
+__pycache__/
+*.pyc
+.DS_Store
