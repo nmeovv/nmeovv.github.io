@@ -2,23 +2,14 @@
 
 from collections import defaultdict
 
-
-HANDLE_TO_NAME = {
-    "@redacted1": "Kim Chaewon",
-    "@redacted3": "Bond",
-    "@redacted4": "Brat",
-    "@redacted2": "bezumnoe mesivo",
-    "@redacted5": "Charli CXC",
-    "@redacted6": "Mr. Vampire",
-    "@redacted7": "ゴードン",
-    "@redacted8": "Ryukyu",
-    "@redacted9": "Witchfinder",
-    "@redacted10": "TTOX",
-    "@redacted11": "Witchfinder",
-    "@redacted12": "utter suitability",
-    "@redacted13": "utter suitability",
-    "@redacted14": "Evgeny Zelenov",
-}
+# The handle -> display name map deanonymises real people, so it must never be
+# committed to this public repo. It lives in handles_local.py, which .gitignore
+# excludes. Without it, `@handle` mentions stay unresolved and count as unknown;
+# `mention_name` entities, which carry a user_id directly, resolve either way.
+try:
+    from handles_local import HANDLE_TO_NAME
+except ImportError:  # pragma: no cover - depends on local checkout only
+    HANDLE_TO_NAME = {}
 
 
 def make_resolver(active_ids, name_of):

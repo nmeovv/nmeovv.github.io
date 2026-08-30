@@ -8,6 +8,10 @@ result*.json
 # twins are only build-time intermediates that build.py reads for the manifest.
 build/*.json
 
+# Telegram handle -> display name map. A handle tied to a name deanonymises a
+# real person, and this repo is public. Never commit it, never `git add -f` it.
+handles_local.py
+
 __pycache__/
 *.pyc
 .DS_Store

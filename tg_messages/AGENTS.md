@@ -17,6 +17,7 @@ Never commit:
   `git add -f`.
 - Anything derived from an export that carries message text, file names, or
   attachment paths.
+- **Any `@handle`.** See the next section.
 - Screenshots or pasted output containing message contents.
 
 Safe to commit:
@@ -27,16 +28,36 @@ Safe to commit:
 `build/*.json` are build-time intermediates and are gitignored; only the `.js`
 twins are published.
 
+## The second rule: no Telegram handles
+
+Display names are published on purpose — they are all over `build/*.js` and on
+the page. A `@handle` is different: it ties one of those names to a real,
+reachable account, so the name-to-handle map is the thing that deanonymises
+people.
+
+That map lives in `handles_local.py`, which `.gitignore` excludes and which must
+stay local. `mentions.py` imports it inside a `try/except ImportError` and falls
+back to an empty map, so a fresh clone still runs — `@handle` mentions just go
+unresolved into the `unknown` bucket and `mentionsMapped` drops. `mention_name`
+entities carry a `user_id` and resolve either way.
+
+Do not paste a handle into a tracked file, a docstring, or a commit message.
+The check below scans every tracked file in this directory and fails on one.
+
+This rule is scoped to `tg_messages/`. The site root and `../visual` contain
+`@`-names inside old anketa poll text — that is body text those projects publish
+deliberately, not a handle map, and it is out of scope here.
+
 ## Check before you commit
 
 ```sh
 python3 check_no_private_data.py
 ```
 
-It fails the commit if a raw export is tracked, if any tracked file is
-export-sized (>5MB), or if the published data contains a key or a string that
-looks like message content. Run it after any change to `extract.py`, the data
-shape, or `build/`.
+It fails the commit if a tracked file names a `@handle`, if a raw export is
+tracked, if any tracked file is export-sized (>5MB), or if the published data
+contains a key or a string that looks like message content. Run it after any
+change to `extract.py`, the data shape, or `build/`.
 
 To make it automatic:
 
@@ -76,6 +97,8 @@ git add -A && git commit && git push
 
 - `albums.py` — merges photo albums the export splits into one message per
   photo. A timing heuristic; there is no `grouped_id` in the export.
+- `mentions.py` — resolves mention entities to participants. Reads the handle
+  map from the gitignored `handles_local.py` when it is present.
 - `extract.py` — one export plus an album window to one aggregate file.
 - `build.py` — every chat x window variant, plus the manifest the page reads
   before fetching any dataset.

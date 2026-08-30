@@ -88,15 +88,55 @@ def walk(node, path="$"):
         yield "str", node, path
 
 
-# --- 1. no raw export may be tracked -------------------------------------
+# --- 0. no Telegram handle may be tracked in this project ----------------
+# A bare display name is fine — the dashboard publishes those on purpose. A
+# @handle is not: it ties that name to a real, reachable Telegram account. The
+# map lives in the gitignored handles_local.py, and nothing tracked here may
+# name a handle.
+#
+# Scoped to tg_messages/ deliberately. The root dashboard and ../visual carry
+# @-names inside old anketa poll text, which is body text those projects
+# publish on purpose and is not a Telegram handle map.
+AT_TOKEN = re.compile(r"@[A-Za-z][A-Za-z0-9_]{3,31}")
+TEXT_SUFFIXES = (".py", ".js", ".html", ".json", ".md", ".txt", ".css")
+
+# CSS at-rules and doc tags match the handle shape but are not handles.
+ALLOWED_AT_TOKENS = {
+    "@media", "@keyframes", "@supports", "@import", "@charset", "@namespace",
+    "@page", "@layer", "@container", "@property", "@font", "@scope", "@starting",
+    "@param", "@returns", "@type", "@typedef", "@example", "@throws", "@see",
+    "@handle",  # the literal word, used in comments describing this rule
+}
+
+
+def scan_handles(project_files):
+    for f in project_files:
+        if not f.endswith(TEXT_SUFFIXES):
+            continue
+        p = HERE / f
+        if not p.is_file():
+            continue
+        text = p.read_text(encoding="utf-8", errors="replace")
+        for token in sorted(set(AT_TOKEN.findall(text))):
+            if token not in ALLOWED_AT_TOKENS:
+                fail(f"{f}: tracked file names the handle {token!r} — a handle "
+                     f"identifies a real account. Remove it, or if it is not a "
+                     f"handle add it to ALLOWED_AT_TOKENS in this script.")
+
+
+# `git -C HERE ls-files` yields paths relative to HERE, so every check below is
+# scoped to this project and paths resolve against HERE.
 tracked = git("ls-files")
+scan_handles(tracked)
+
+# --- 1. no raw export may be tracked -------------------------------------
 for f in tracked:
     if re.search(r"result\d*\.json$", f):
         fail(f"raw Telegram export is tracked by git: {f}")
 
 # --- 2. nothing export-sized may be tracked ------------------------------
 for f in tracked:
-    p = HERE.parent / f
+    p = HERE / f
     if p.is_file() and p.stat().st_size > MAX_TRACKED_BYTES:
         fail(f"tracked file is {p.stat().st_size/1e6:.1f}MB, over the "
              f"{MAX_TRACKED_BYTES/1e6:.0f}MB limit: {f}")

@@ -1,4 +1,4 @@
-"""Test the claim: "Mr. Vampire, Kim Chaewon, Ryukyu and @redacted7 (ゴードン)
+"""Test the claim: "Mr. Vampire, Kim Chaewon, Ryukyu and ゴードン
 interact with each other far more than with everyone else."
 
 Raw counts cannot answer this — heavy posters accumulate big numbers with everybody.
@@ -22,7 +22,7 @@ from albums import add_window_argument, collapse_albums, validate_window
 from mentions import make_resolver
 
 MIN_MESSAGES = 50
-GROUP = ["Mr. Vampire", "Kim Chaewon", "Ryukyu", "ゴードン"]  # ゴードン = @redacted7
+GROUP = ["Mr. Vampire", "Kim Chaewon", "Ryukyu", "ゴードン"]
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--input", type=Path, default=Path("result.json"))
@@ -275,7 +275,7 @@ for kind in ("reply", "react", "mention"):
     }
 
 out_json = {
-    "group": GROUP, "groupNote": "ゴードン is @redacted7",
+    "group": GROUP,
     "albumWindow": album_window,
     "people": labels, "msgCount": [count[u] for u in people],
     "groupMsgShare": round(sum(count[uid] for uid in group_ids) / total_msgs, 3),
