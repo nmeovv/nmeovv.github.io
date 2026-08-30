@@ -1,0 +1,30 @@
+#!/bin/sh
+# Block private Telegram message data from reaching this public Pages repo.
+# Enable with:  git config core.hooksPath .githooks
+#
+# Only runs when tg_messages/ is involved, so the other projects in this repo
+# are unaffected.
+
+set -e
+
+root=$(git rev-parse --show-toplevel)
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# A raw export must never be staged, from any directory.
+if echo "$staged" | grep -Eq 'result[0-9]*\.json$'; then
+  echo "pre-commit: refusing to commit a raw Telegram export." >&2
+  echo "These contain private message contents. Unstage them:" >&2
+  echo "$staged" | grep -E 'result[0-9]*\.json$' | sed 's/^/  git restore --staged /' >&2
+  exit 1
+fi
+
+echo "$staged" | grep -q '^tg_messages/' || exit 0
+
+if [ -f "$root/tg_messages/check_no_private_data.py" ]; then
+  python3 "$root/tg_messages/check_no_private_data.py" >/dev/null || {
+    python3 "$root/tg_messages/check_no_private_data.py" >/dev/null 2>&1 || true
+    echo "pre-commit: private data check failed. Details:" >&2
+    python3 "$root/tg_messages/check_no_private_data.py" 2>&1 >/dev/null | sed 's/^/  /' >&2
+    exit 1
+  }
+fi
